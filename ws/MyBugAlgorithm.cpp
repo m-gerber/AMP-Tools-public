@@ -2,7 +2,7 @@
 #include <thread>
 
 // Implement your methods in the `.cpp` file, for example:
-amp::Path2D MyBugAlgorithm::plan(const amp::Problem2D& problem) const {
+amp::Path2D MyBugAlgorithm::plan(const amp::Problem2D& problem) {
 
     // Your algorithm solves the problem and generates a path. Here is a path definition.
     amp::Path2D path;
@@ -53,6 +53,7 @@ amp::Path2D MyBugAlgorithm::plan(const amp::Problem2D& problem) const {
     bug_path[iter].x = 13;
     bug_path[iter].y = 5;
     amp::WallInfo closestWall = findWall(bug_path[iter].x,bug_path[iter].y, problem);
+    amp::PolyInfo nearbyPolgon = nearPolygon(bug_path[iter].x,bug_path[iter].y,problem);
 
     std::cout << "(x,y):   (" << bug_path[iter].x << "," << bug_path[iter].y << ")" << std::endl;
     std::cout << "(x1,y1): (" << (closestWall.x1) << "," << (closestWall.y1) << ")" << std::endl;

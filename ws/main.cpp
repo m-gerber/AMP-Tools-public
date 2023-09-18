@@ -14,12 +14,12 @@ int main(int argc, char** argv) {
     /*    Randomly generate the problem     */ 
 
     // Use WO1 from Exercise 2
-    Problem2D problem = HW2::getWorkspace1();
+    // Problem2D problem = HW2::getWorkspace1();
 
     // Use WO1 from Exercise 2
-    /*
-    Problem2D problem = HW2::getWorkspace2();
-    */
+    // /*
+    // Problem2D problem = HW2::getWorkspace2();
+    // */
 
     // Make a random environment spec, edit properties about it such as the number of obstacles
     /*
@@ -37,6 +37,7 @@ int main(int argc, char** argv) {
     MyBugAlgorithm algo;
     
     {
+        /*
         // Call your algorithm on the problem
         amp::Path2D path = algo.plan(problem);
 
@@ -47,6 +48,7 @@ int main(int argc, char** argv) {
 
         // Visualize the path and environment
         Visualizer::makeFigure(problem, path);
+        */
     }
 
     // Let's get crazy and generate a random environment and test your algorithm

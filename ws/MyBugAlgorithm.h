@@ -32,6 +32,84 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
         // Override and implement the bug algorithm in the plan method. The methods are declared here in the `.h` file
         virtual amp::Path2D plan(const amp::Problem2D& problem) override;
 
+        std::vector<amp::PathPoints> makePath(int algo, const amp::Problem2D& problem) {
+            // Initialize the starting point for the bug to be the intial point for the bug.
+            double x_bug = problem.q_init[0];
+            double y_bug = problem.q_init[1];
+
+            // Create a vector of type PathPoints to hold x, y, coordinates of steps, step sizes, and distance to goal.
+            std::vector<amp::PathPoints> bug_path;
+            std::vector<amp::PathPoints> follow_path;
+
+            // Define the first point in this vector to be start point.
+            amp::PathPoints path_points;
+            path_points.x = x_bug;
+            path_points.y = y_bug;
+            path_points.step = 0;
+            bug_path.push_back(path_points);
+
+            // Set the value for sizes of steps to take toward the goal with each move.
+            double step_size = 0.02;
+            // Set the distance to check ahead of the bug at each step to avoid obstacle collision.
+            double check_distance = 0.02;
+
+            // Create doubles to hold the x, y, and Euclidian distance to goal along with the angle to the goal.
+            double dx, dy, distance_to_goal, angle_to_goal;
+            // Create doubles to hold the step size taken in the x and y directions.
+            double step_x, step_y;
+            double forward_check;
+            int follow_obstacle;
+
+            int hit_index;
+            int following = 0;
+
+            int num_angles = 20;
+            double ahead_x;
+            double ahead_y;
+            double angle_view, angle_start, angle_delta;
+
+            bool inside;
+            
+            // Bug 1 Algorithm
+            while (!goalReached(bug_path.back().x,bug_path.back().y, step_size, problem)) {
+                dx = problem.q_goal[0] - bug_path.back().x;
+                dy = problem.q_goal[1] - bug_path.back().y;
+                distance_to_goal = sqrt(pow(dx,2) + pow(dy,2));
+                bug_path.back().goal_distance = distance_to_goal;
+                angle_to_goal = atan(dy/dx);
+                if (dx < 0) {
+                    angle_to_goal += M_PI;
+                }
+
+                angle_view  = M_PI;
+                angle_delta = angle_view / (num_angles - 1);
+
+                ahead_x = bug_path.back().x + check_distance * cos(angle_to_goal);
+                ahead_y = bug_path.back().y + check_distance * sin(angle_to_goal);
+                inside = inPolygon(ahead_x,ahead_y,problem);
+
+                if (!inside) {
+                    step_x = step_size * cos(angle_to_goal);
+                    step_y = step_size * sin(angle_to_goal);
+
+                    path_points.x = bug_path.back().x + step_x;
+                    path_points.y = bug_path.back().y + step_y;
+                    path_points.step = step_size;
+                    path_points.goal_distance = distance_to_goal;
+                    bug_path.push_back(path_points);
+                } else {
+                    follow_path = bugFollow(bug_path.back().x, bug_path.back().y, algo, problem);
+                    bug_path.insert(bug_path.end(), follow_path.begin(), follow_path.end());
+                }
+            }
+            
+            path_points.x = problem.q_goal[0];
+            path_points.y = problem.q_goal[1];
+            bug_path.push_back(path_points);
+
+            return bug_path;
+        }
+
         bool goalReached(double x, double y, double step_size, const amp::Problem2D& problem) const {
             double dx = problem.q_goal[0] - x;
             double dy = problem.q_goal[1] - y;
@@ -135,6 +213,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
             return cross;
         }
 
+        // https://stackoverflow.com/questions/3838329/how-can-i-check-if-two-segments-intersect
         bool ccw(amp::Point A, amp::Point B, amp::Point C) {
             return (C.y-A.y) * (B.x-A.x) > (B.y-A.y) * (C.x-A.x);
         }
@@ -149,7 +228,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
             double dx, dy;
             double closest_distance;
 
-            int closest_ind;
+            double closest_ind;
 
             // Set the value for sizes of steps to take toward the goal with each move.
             double step_size = 0.03;
@@ -214,14 +293,13 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
             x_step = x_start + step_size*cos(angle_i*angle_step);
             y_step = y_start + step_size*sin(angle_i*angle_step);
 
-            dx = problem.q_goal[0] - x_step;
-            dy = problem.q_goal[1] - y_step;
+            dx = x_step - problem.q_goal[0];
+            dy = y_step - problem.q_goal[1];
 
             angle_prev = atan(dy/dx);
             if (dx < 0) {
                 angle_prev += M_PI;
             }
-            angle_prev += M_PI/2;
             
             std::vector<amp::PathPoints> follow_path;
 
@@ -241,7 +319,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
 
                 angle_i = 0;
 
-                input_angle = angle_i*angle_step + angle_prev-M_PI/2;
+                input_angle = angle_i*angle_step + angle_prev+M_PI*1.1;
                 x_step = follow_path.back().x + step_size*cos(input_angle);
                 y_step = follow_path.back().y + step_size*sin(input_angle);
                 point2.x = x_step;
@@ -251,7 +329,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
 
                 angle_i++;
 
-                input_angle = angle_i*angle_step + angle_prev-M_PI/2.2;
+                input_angle = angle_i*angle_step + angle_prev+M_PI*1.1;
                 x_step = follow_path.back().x + step_size*cos(input_angle);
                 y_step = follow_path.back().y + step_size*sin(input_angle);
                 point2.x = x_step;
@@ -259,11 +337,10 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                 line.p2 = point2;
                 crosses = cross(line, problem);
 
-                angle_i++;
-
                 while (!((crosses_prev == 1) && (crosses == 0))) {
+                    angle_i++;
                     crosses_prev = crosses;
-                    input_angle = angle_i*angle_step + angle_prev-M_PI/2.2;
+                    input_angle = angle_i*angle_step + angle_prev+M_PI*1.1;
                     x_step = follow_path.back().x + step_size*cos(input_angle);
                     y_step = follow_path.back().y + step_size*sin(input_angle);
                     point2.x = x_step;
@@ -271,32 +348,30 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                     line.p2 = point2;
                     crosses = cross(line, problem);
                     inside = inPolygon(x_step, y_step, problem);
-                    if (inside && !crosses) crosses = !crosses; 
-                    angle_i++;
+                    if (inside && !crosses) crosses = !crosses;
                     if (angle_i == num_angles) {
                         angle_i = 0;
                         num_angles = 94;
                         while (!((crosses_prev == 1) && (crosses == 0))) {
-                            input_angle = angle_i*angle_step + angle_prev-M_PI/2.2;
+                            angle_i++;
+                            input_angle = angle_i*angle_step + angle_prev+M_PI*1.1;
                             x_step = follow_path.back().x + step_size*cos(input_angle);
                             y_step = follow_path.back().y + step_size*sin(input_angle);
                             point2.x = x_step;
                             point2.y = y_step;
                             line.p2 = point2;
                             crosses = cross(line, problem);
-                            angle_i++;
                         }
+                        break;
                         num_angles = 36;
                     };
                 }
 
-                input_angle = angle_i*angle_step + angle_prev-M_PI/2.2;
                 x_step = follow_path.back().x + step_size*cos(input_angle);
                 y_step = follow_path.back().y + step_size*sin(input_angle);
                 angle_prev = input_angle;
 
                 if (!inPolygon(x_step, y_step, problem)) {
-
                     dx = problem.q_goal[0] - x_step;
                     dy = problem.q_goal[1] - y_step;
                     follow_point.goal_distance = sqrt(pow(dx,2) + pow(dy,2));
@@ -308,36 +383,49 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
 
                     if (follow_path.size() > 5) {
                         if (algo == 1) {
-                            if (sqrt(pow(follow_path.back().x-x_start,2) + pow(follow_path.back().y-y_start,2)) <= 2*step_size) {
-                                closest_distance = follow_path[0].goal_distance;
-                                int num_points_followed = follow_path.size();
-                                for (int i = 0; i < num_points_followed; i++) {
-                                    if (follow_path[i].goal_distance < closest_distance) {
-                                        closest_distance = follow_path[i].goal_distance;
-                                        closest_ind = i;
+                            double distance_from_start = sqrt(pow(follow_path.back().x-x_start,2) + pow(follow_path.back().y-y_start,2));
+                            if (distance_from_start <= 2*step_size) {
+                                point1.x = follow_path.back().x;
+                                point1.y = follow_path.back().y;
+                                line.p1 = point1;
+                                point2.x = x_start;
+                                point2.y = y_start;
+                                line.p2 = point2;
+                                crosses = cross(line, problem);
+                                if (crosses == false) {
+                                    follow_point.x = x_start;
+                                    follow_point.y = y_start;
+                                    follow_point.step = distance_from_start;
+                                    follow_path.push_back(follow_point);
+                                    closest_distance = follow_path[0].goal_distance;
+                                    double num_points_followed = follow_path.size();
+                                    for (int i = 0; i < num_points_followed; i++) {
+                                        if (follow_path[i].goal_distance < closest_distance) {
+                                            closest_distance = follow_path[i].goal_distance;
+                                            closest_ind = i;
+                                        }
                                     }
+                                    if (closest_ind/num_points_followed < 0.5) {
+                                        for (int i = 0; i < closest_ind+1; i++) {
+                                            follow_point.x = follow_path[i].x;
+                                            follow_point.y = follow_path[i].y;
+                                            follow_point.step = follow_path[i].step;
+                                            follow_path.push_back(follow_point);
+                                        }
+                                    } else {
+                                        for (int i = num_points_followed; i > closest_ind-1; i--) {
+                                            follow_point.x = follow_path[i].x;
+                                            follow_point.y = follow_path[i].y;
+                                            follow_point.step = follow_path[i].step;
+                                            follow_path.push_back(follow_point);
+                                        }
+                                    }
+                                    break;
                                 }
-
-                                if (closest_ind/num_points_followed < 0.5) {
-                                    for (int i = 0; i < closest_ind; i++) {
-                                        follow_point.x = follow_path[i].x;
-                                        follow_point.y = follow_path[i].y;
-                                        follow_point.step = follow_path[i].step;
-                                        follow_path.push_back(follow_point);
-                                    }
-                                } else {
-                                    for (int i = num_points_followed; i > closest_ind; i--) {
-                                        follow_point.x = follow_path[i].x;
-                                        follow_point.y = follow_path[i].y;
-                                        follow_point.step = follow_path[i].step;
-                                        follow_path.push_back(follow_point);
-                                    }
-                                }
-                                break;
                             }
                         } else if (algo == 2) {
                             m_line_y = m_line_slope * (follow_path.back().x - x_begin) + y_begin;
-                            if ((std::abs(follow_path.back().y - m_line_y) < 2*step_size)) {
+                            if ((std::abs(follow_path.back().y - m_line_y) <= step_size)) {
                                 if (start_dist - follow_path.back().goal_distance > 2*step_size) {
                                     break;
                                 }

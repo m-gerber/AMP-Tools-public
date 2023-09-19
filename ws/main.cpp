@@ -56,7 +56,10 @@ int main(int argc, char** argv) {
         amp::Path2D path; // Make empty path, problem, and collision points, as they will be created by generateAndCheck()
         amp::Problem2D random_prob; 
         std::vector<Eigen::Vector2d> collision_points;
-        bool random_trial_success = HW2::generateAndCheck(algo, path, random_prob, collision_points);
+        bool random_trial_success = 1;
+        while (random_trial_success) {
+            random_trial_success = HW2::generateAndCheck(algo, path, random_prob, collision_points);
+        }
         LOG("Found valid solution in random environment: " << (random_trial_success ? "Yes!" : "No :("));
 
         // Visualize the path environment, and any collision points with obstacles

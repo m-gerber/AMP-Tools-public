@@ -62,10 +62,15 @@ int main(int argc, char** argv) {
         }
         LOG("Found valid solution in random environment: " << (random_trial_success ? "Yes!" : "No :("));
 
+        LOG("path length: " << path.length());
+
         // Visualize the path environment, and any collision points with obstacles
         Visualizer::makeFigure(random_prob, path, collision_points);
     }
 
     Visualizer::showFigures();
+
+    HW2::grade(algo, "nonhuman.biologic@myspace.edu", argc, argv);
+
     return 0;
 }

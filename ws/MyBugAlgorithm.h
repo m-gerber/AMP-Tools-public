@@ -154,74 +154,87 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
             return inside;
         }
 
-        // https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/#
-        int direction(amp::Point p, amp::Point q, amp::Point r) {
-            double orientation = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
-            if (orientation == 0) {
-                return 0;
-            } else if (orientation > 0) {
-                return 1;
-            }
-            return 2;
-        }
+        bool lineIntersect(amp::Line line, const amp::Problem2D& problem) {
+            double x1 = line.p1.x;
+            double y1 = line.p1.y;
+            double x2 = line.p2.x;
+            double y2 = line.p2.y;
 
-        bool onLine(amp::Point p, amp::Point q, amp::Point r)
-        {
-            if ((q.x <= std::max(p.x, r.x)) && (q.x >= std::min(p.x, r.x)) &&
-                (q.y <= std::max(p.y, r.y)) && (q.y >= std::min(p.y, r.y))) {
-                return true;
-            }
-            return false;
-        }
+            double t, u;
+            double x3, y3, x4, y4;
 
-        bool cross(amp::Line line, const amp::Problem2D& problem) {
-            int o1, o2, o3, o4;
-            amp::Point p1, q1, p2, q2;
-
-            p1 = line.p1;
-            q1 = line.p2;
+            double slope1, slope2;
+            double x1_y3, x1_y4, x2_y3, x2_y4;
 
             int num_obstacles = problem.obstacles.size();
             int num_vertices;
 
-            bool cross = false;
-
             for (int i = 0; i < num_obstacles; i++) {
                 num_vertices = problem.obstacles[i].verticesCCW().size();
                 for (int j = 0; j < num_vertices; j++) {
-                    p2.x = problem.obstacles[i].verticesCCW()[j][0];
-                    p2.y = problem.obstacles[i].verticesCCW()[j][1];
-                    q2.x = problem.obstacles[i].verticesCCW()[j+1][0];
-                    q2.y = problem.obstacles[i].verticesCCW()[j+1][1];
+                    x3 = problem.obstacles[i].verticesCCW()[j][0];
+                    y3 = problem.obstacles[i].verticesCCW()[j][1];
+                    x4 = problem.obstacles[i].verticesCCW()[j+1][0];
+                    y4 = problem.obstacles[i].verticesCCW()[j+1][1];
                     if (j == num_vertices-1) {
-                        q2.x = problem.obstacles[i].verticesCCW()[0][0];
-                        q2.y = problem.obstacles[i].verticesCCW()[0][1];
+                        x4 = problem.obstacles[i].verticesCCW()[0][0];
+                        y4 = problem.obstacles[i].verticesCCW()[0][1];
                     }
-                    o1 = direction(p1, q1, p2);
-                    o2 = direction(p1, q1, q2);
-                    o3 = direction(p2, q2, p1);
-                    o4 = direction(p2, q2, q1);
-
-                    if ((o1 != o2) && (o3 != o4)) cross = true;
-                    if ((o1 == 0) && onLine(p1, p2, q1)) cross = true;
-                    if ((o2 == 0) && onLine(p1, q2, q1)) cross = true;
-                    if ((o3 == 0) && onLine(p2, p1, q2)) cross = true;
-                    if ((o4 == 0) && onLine(p2, q1, q2)) cross = true;
-                    if (intersect(p1,q1,p2,q2)) cross = true;
-                } if (cross) return cross;
+                    slope1 = (y2-y1)/(x2-x1);
+                    slope2 = (y4-y3)/(x4-x3);
+                    if (((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)) != 0) {
+                        t = ((x1-x3)*(y3-y4) - (y1-y3)*(x3-x4)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4));
+                        u = ((x1-x3)*(y1-y2) - (y1-y3)*(x1-x2)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4));
+                        if ((t >= 0 && t <= 1) && (u >= 0 && u <= 1)) return true;
+                    } else if ((slope1 == slope2) || (slope1 == -slope2)) {
+                        x1_y3 = slope2 * (x1 - x3) + y3;
+                        x1_y4 = slope2 * (x1 - x4) + y4;
+                        x2_y3 = slope2 * (x2 - x3) + y3;
+                        x2_y4 = slope2 * (x2 - x4) + y4;
+                        if ((y1 == x1_y3) || (y1 == x1_y4) || (y2 == x2_y3) || (y2 == x2_y4)) {
+                            return true;
+                        }
+                    } else return false;
+                }
             }
-            return cross;
+            return false;
         }
+/*
+        bool lineIntersect2(amp::Line line1, amp::Line line2) {
+            double x1 = line1.p1.x;
+            double y1 = line1.p1.y;
+            double x2 = line1.p2.x;
+            double y2 = line1.p2.y;
 
-        // https://stackoverflow.com/questions/3838329/how-can-i-check-if-two-segments-intersect
-        bool ccw(amp::Point A, amp::Point B, amp::Point C) {
-            return (C.y-A.y) * (B.x-A.x) > (B.y-A.y) * (C.x-A.x);
+            double x3 = line2.p1.x;
+            double y3 = line2.p1.y;
+            double x4 = line2.p2.x;
+            double y4 = line2.p2.y;
+
+            double t, u;
+
+            double slope1, slope2;
+            double x1_y3, x1_y4, x2_y3, x2_y4;
+
+            slope1 = (y2-y1)/(x2-x1);
+            slope2 = (y4-y3)/(x4-x3);
+           
+            if (((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)) != 0) {
+                t = ((x1-x3)*(y3-y4) - (y1-y3)*(x3-x4)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4));
+                u = ((x1-x3)*(y1-y2) - (y1-y3)*(x1-x2)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4));
+                if ((t >= 0 && t <= 1) && (u >= 0 && u <= 1)) return true;
+            } else if ((slope1 == slope2) || (slope1 == -slope2)) {
+                x1_y3 = slope2 * (x1 - x3) + y3;
+                x1_y4 = slope2 * (x1 - x4) + y4;
+                x2_y3 = slope2 * (x2 - x3) + y3;
+                x2_y4 = slope2 * (x2 - x4) + y4;
+                if ((y1 == x1_y3) || (y1 == x1_y4) || (y2 == x2_y3) || (y2 == x2_y4)) {
+                    return true;
+                }
+            } else return false;
+            return false;
         }
-
-        bool intersect(amp::Point A, amp::Point B, amp::Point C, amp::Point D) {
-            return ((ccw(A,C,D) != ccw(B,C,D)) && (ccw(A,B,C) != ccw(A,B,D)));
-        }
-
+*/
         std::vector<amp::PathPoints> bugFollow(double x_start, double y_start, int algo, const amp::Problem2D& problem) {
             int angle_i = 0;
 
@@ -265,8 +278,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
             point2.x = x_step;
             point2.y = y_step;
             line.p2 = point2;
-            crosses_prev = cross(line, problem);
-
+            crosses_prev = lineIntersect(line, problem);
 
             angle_i++;
 
@@ -275,7 +287,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
             point2.x = x_step;
             point2.y = y_step;
             line.p2 = point2;
-            crosses = cross(line, problem);
+            crosses = lineIntersect(line, problem);
 
             angle_i++;
 
@@ -286,7 +298,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                 point2.x = x_step;
                 point2.y = y_step;
                 line.p2 = point2;
-                crosses = cross(line, problem);
+                crosses = lineIntersect(line, problem);
                 angle_i++;
             }
 
@@ -325,7 +337,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                 point2.x = x_step;
                 point2.y = y_step;
                 line.p2 = point2;
-                crosses_prev = cross(line, problem);
+                crosses_prev = lineIntersect(line, problem);
 
                 angle_i++;
 
@@ -335,7 +347,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                 point2.x = x_step;
                 point2.y = y_step;
                 line.p2 = point2;
-                crosses = cross(line, problem);
+                crosses = lineIntersect(line, problem);
 
                 while (!((crosses_prev == 1) && (crosses == 0))) {
                     angle_i++;
@@ -346,7 +358,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                     point2.x = x_step;
                     point2.y = y_step;
                     line.p2 = point2;
-                    crosses = cross(line, problem);
+                    crosses = lineIntersect(line, problem);
                     inside = inPolygon(x_step, y_step, problem);
                     if (inside && !crosses) crosses = !crosses;
                     if (angle_i == num_angles) {
@@ -360,7 +372,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                             point2.x = x_step;
                             point2.y = y_step;
                             line.p2 = point2;
-                            crosses = cross(line, problem);
+                            crosses = lineIntersect(line, problem);
                         }
                         break;
                         num_angles = 36;
@@ -391,7 +403,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                                 point2.x = x_start;
                                 point2.y = y_start;
                                 line.p2 = point2;
-                                crosses = cross(line, problem);
+                                crosses = lineIntersect(line, problem);
                                 if (crosses == false) {
                                     follow_point.x = x_start;
                                     follow_point.y = y_start;

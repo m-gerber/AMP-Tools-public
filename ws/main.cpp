@@ -10,6 +10,8 @@
 using namespace amp;
 
 int main(int argc, char** argv) {
+    /*    Include this line to have different randomized environments every time you run your code (NOTE: this has no affect on grade()) */
+    amp::RNG::seed(amp::RNG::randiUnbounded());
 
     /*    Randomly generate the problem     */ 
 
@@ -76,6 +78,8 @@ int main(int argc, char** argv) {
     }
 
     Visualizer::showFigures();
+
+    HW2::grade(algo, "nonhuman.biologic@myspace.edu", argc, argv);
 
     return 0;
 }

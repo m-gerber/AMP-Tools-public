@@ -50,8 +50,6 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
 
             // Set the value for sizes of steps to take toward the goal with each move.
             double step_size = 0.02;
-            // Set the distance to check ahead of the bug at each step to avoid obstacle collision.
-            double check_distance = 0.02;
 
             // Create doubles to hold the x, y, and Euclidian distance to goal along with the angle to the goal.
             double dx, dy, distance_to_goal, angle_to_goal;
@@ -79,13 +77,15 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                 angle_to_goal = atan(dy/dx);
                 if (dx < 0) {
                     angle_to_goal += M_PI;
+                } else if (angle_to_goal < 0) {
+                    angle_to_goal += 2*M_PI;
                 }
 
                 angle_view  = M_PI;
                 angle_delta = angle_view / (num_angles - 1);
 
-                ahead_x = bug_path.back().x + check_distance * cos(angle_to_goal);
-                ahead_y = bug_path.back().y + check_distance * sin(angle_to_goal);
+                ahead_x = bug_path.back().x + step_size * cos(angle_to_goal);
+                ahead_y = bug_path.back().y + step_size * sin(angle_to_goal);
                 inside = inPolygon(ahead_x,ahead_y,problem);
 
                 if (!inside) {
@@ -154,6 +154,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
             return inside;
         }
 
+        // https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
         bool lineIntersect(amp::Line line, const amp::Problem2D& problem) {
             double x1 = line.p1.x;
             double y1 = line.p1.y;
@@ -199,42 +200,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
             }
             return false;
         }
-/*
-        bool lineIntersect2(amp::Line line1, amp::Line line2) {
-            double x1 = line1.p1.x;
-            double y1 = line1.p1.y;
-            double x2 = line1.p2.x;
-            double y2 = line1.p2.y;
 
-            double x3 = line2.p1.x;
-            double y3 = line2.p1.y;
-            double x4 = line2.p2.x;
-            double y4 = line2.p2.y;
-
-            double t, u;
-
-            double slope1, slope2;
-            double x1_y3, x1_y4, x2_y3, x2_y4;
-
-            slope1 = (y2-y1)/(x2-x1);
-            slope2 = (y4-y3)/(x4-x3);
-           
-            if (((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)) != 0) {
-                t = ((x1-x3)*(y3-y4) - (y1-y3)*(x3-x4)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4));
-                u = ((x1-x3)*(y1-y2) - (y1-y3)*(x1-x2)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4));
-                if ((t >= 0 && t <= 1) && (u >= 0 && u <= 1)) return true;
-            } else if ((slope1 == slope2) || (slope1 == -slope2)) {
-                x1_y3 = slope2 * (x1 - x3) + y3;
-                x1_y4 = slope2 * (x1 - x4) + y4;
-                x2_y3 = slope2 * (x2 - x3) + y3;
-                x2_y4 = slope2 * (x2 - x4) + y4;
-                if ((y1 == x1_y3) || (y1 == x1_y4) || (y2 == x2_y3) || (y2 == x2_y4)) {
-                    return true;
-                }
-            } else return false;
-            return false;
-        }
-*/
         std::vector<amp::PathPoints> bugFollow(double x_start, double y_start, int algo, const amp::Problem2D& problem) {
             int angle_i = 0;
 
@@ -245,10 +211,8 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
 
             // Set the value for sizes of steps to take toward the goal with each move.
             double step_size = 0.03;
-            // Set the distance to check ahead of the bug at each step to avoid obstacle collision.
-            double check_distance = 0.03;
 
-            int num_angles = 36;
+            int num_angles = 33;
             double angle_step = 2*M_PI / num_angles;
 
             double x_step;
@@ -311,6 +275,8 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
             angle_prev = atan(dy/dx);
             if (dx < 0) {
                 angle_prev += M_PI;
+            } else if (angle_prev) {
+                angle_prev += 2*M_PI;
             }
             
             std::vector<amp::PathPoints> follow_path;
@@ -331,7 +297,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
 
                 angle_i = 0;
 
-                input_angle = angle_i*angle_step + angle_prev+M_PI*1.1;
+                input_angle = angle_i*angle_step + angle_prev+M_PI*1.001;
                 x_step = follow_path.back().x + step_size*cos(input_angle);
                 y_step = follow_path.back().y + step_size*sin(input_angle);
                 point2.x = x_step;
@@ -341,7 +307,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
 
                 angle_i++;
 
-                input_angle = angle_i*angle_step + angle_prev+M_PI*1.1;
+                input_angle = angle_i*angle_step + angle_prev+M_PI*1.001;
                 x_step = follow_path.back().x + step_size*cos(input_angle);
                 y_step = follow_path.back().y + step_size*sin(input_angle);
                 point2.x = x_step;
@@ -352,7 +318,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                 while (!((crosses_prev == 1) && (crosses == 0))) {
                     angle_i++;
                     crosses_prev = crosses;
-                    input_angle = angle_i*angle_step + angle_prev+M_PI*1.1;
+                    input_angle = angle_i*angle_step + angle_prev+M_PI*1.001;
                     x_step = follow_path.back().x + step_size*cos(input_angle);
                     y_step = follow_path.back().y + step_size*sin(input_angle);
                     point2.x = x_step;
@@ -361,22 +327,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                     crosses = lineIntersect(line, problem);
                     inside = inPolygon(x_step, y_step, problem);
                     if (inside && !crosses) crosses = !crosses;
-                    if (angle_i == num_angles) {
-                        angle_i = 0;
-                        num_angles = 94;
-                        while (!((crosses_prev == 1) && (crosses == 0))) {
-                            angle_i++;
-                            input_angle = angle_i*angle_step + angle_prev+M_PI*1.1;
-                            x_step = follow_path.back().x + step_size*cos(input_angle);
-                            y_step = follow_path.back().y + step_size*sin(input_angle);
-                            point2.x = x_step;
-                            point2.y = y_step;
-                            line.p2 = point2;
-                            crosses = lineIntersect(line, problem);
-                        }
-                        break;
-                        num_angles = 36;
-                    };
+                    if (angle_i == num_angles) break;
                 }
 
                 x_step = follow_path.back().x + step_size*cos(input_angle);
@@ -411,7 +362,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                                     follow_path.push_back(follow_point);
                                     closest_distance = follow_path[0].goal_distance;
                                     double num_points_followed = follow_path.size();
-                                    for (int i = 0; i < num_points_followed; i++) {
+                                    for (int i = 0; i < num_points_followed-1; i++) {
                                         if (follow_path[i].goal_distance < closest_distance) {
                                             closest_distance = follow_path[i].goal_distance;
                                             closest_ind = i;
@@ -425,7 +376,7 @@ class MyBugAlgorithm : public amp::BugAlgorithm {
                                             follow_path.push_back(follow_point);
                                         }
                                     } else {
-                                        for (int i = num_points_followed; i > closest_ind-1; i--) {
+                                        for (int i = num_points_followed-1; i > closest_ind; i--) {
                                             follow_point.x = follow_path[i].x;
                                             follow_point.y = follow_path[i].y;
                                             follow_point.step = follow_path[i].step;

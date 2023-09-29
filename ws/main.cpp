@@ -62,12 +62,12 @@ int main(int argc, char** argv) {
         int test_random = 0;
         //for (int i = 0; i < 10; i++) {
             if (test_random == 1) {
-                random_trial_success = HW2::generateAndCheck(algo, path, random_prob, collision_points);
-                while (random_trial_success) {
+                // random_trial_success = HW2::generateAndCheck(algo, path, random_prob, collision_points);
+                // while (random_trial_success) {
                     random_trial_success = HW2::generateAndCheck(algo, path, random_prob, collision_points);
                     LOG("Found valid solution in random environment: " << (random_trial_success ? "Yes!" : "No :("));
                     LOG("path length: " << path.length());
-                }
+                // }
             }
         //}
 
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 
     Visualizer::showFigures();
 
-    HW2::grade(algo, "nonhuman.biologic@myspace.edu", argc, argv);
+    // HW2::grade(algo, "nonhuman.biologic@myspace.edu", argc, argv);
 
     return 0;
 }

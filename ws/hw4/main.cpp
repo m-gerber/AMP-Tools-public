@@ -7,6 +7,7 @@
 // Include the header of the shared class
 #include "HelpfulClass.h"
 
+
 using namespace amp;
 
 int main(int argc, char** argv) {
@@ -55,7 +56,7 @@ int main(int argc, char** argv) {
 
     amp::Polygon robot(vertices);
 
-    double rotation_discretization = 1;
+    double rotation_discretization = 12;
     double rotation_angle = 2*M_PI / (rotation_discretization);
 
     double vertex_angle, angle_rotated;
@@ -187,9 +188,12 @@ int main(int argc, char** argv) {
         C_OBS.push_back(c_obs);
     }
 
+    std::vector<amp::Polygon> slice;
+    slice.push_back(C_OBS[11]);
 
-    int plot = 0;
-    if (plot) {
+    int plot1 = 0;
+    if (plot1) {
+        amp::Visualizer::makeFigure(slice,1);
         amp::Visualizer::makeFigure(C_OBS, heights_3d);
         amp::Visualizer::showFigures();
     }
@@ -199,11 +203,108 @@ int main(int argc, char** argv) {
     amp::MyLinkManipulator test_links(link_lengths);
     // test_links.getJointLocation(angles,1);
     angles = test_links.getConfigurationFromIK(Eigen::Vector2d(0,3));
-    
-    amp::Visualizer::makeFigure(test_links, angles);
-    amp::Visualizer::showFigures();
+
+    int plot2 = 0;
+    if (plot2) {
+        amp::Visualizer::makeFigure(test_links, angles);
+        amp::Visualizer::showFigures();
+    }
+
+    amp::Environment2D env1, env2, env3;
+    std::vector<Obstacle2D> obs1, obs2, obs3;
+    amp::Obstacle2D o0, o1, o2, o2p;
+
+    vertices.clear();
+    vertices.push_back(Eigen::Vector2d(0.25,0.25));
+    vertices.push_back(Eigen::Vector2d(0.0,0.75));
+    vertices.push_back(Eigen::Vector2d(-0.25,0.25));
+    o0.verticesCCW() = vertices;
+
+    vertices.clear();
+    vertices.push_back(Eigen::Vector2d(-0.25,1.1));
+    vertices.push_back(Eigen::Vector2d(0.25,1.1));
+    vertices.push_back(Eigen::Vector2d(0.25,2));
+    vertices.push_back(Eigen::Vector2d(-0.25,2));
+     o1.verticesCCW() = vertices;
+
+    vertices.clear();
+    vertices.push_back(Eigen::Vector2d(-2,-2));
+    vertices.push_back(Eigen::Vector2d(2,-2));
+    vertices.push_back(Eigen::Vector2d(2,-1.8));
+    vertices.push_back(Eigen::Vector2d(-2,-1.8));
+    o2.verticesCCW() = vertices;
+
+    vertices.clear();
+    vertices.push_back(Eigen::Vector2d(-2,-0.5));
+    vertices.push_back(Eigen::Vector2d(2,-0.5));
+    vertices.push_back(Eigen::Vector2d(2,-0.3));
+    vertices.push_back(Eigen::Vector2d(-2,-0.3));
+    o2p.verticesCCW() = vertices;
+
+    obs1.push_back(o0);
+    obs2.push_back(o1);
+    obs2.push_back(o2);
+    obs3.push_back(o1);
+    obs3.push_back(o2p);
+
+    env1.obstacles = obs1;
+    env1.x_min = -2.0;
+    env1.x_max = 2.0;
+    env1.y_min = -2.0;
+    env1.y_max = 2.0;
+    env2.obstacles = obs2;
+    env2.x_min = -2.0;
+    env2.x_max = 2.0;
+    env2.y_min = -2.0;
+    env2.y_max = 2.0;
+    env3.obstacles = obs3;
+    env3.x_min = -2.0;
+    env3.x_max = 2.0;
+    env3.y_min = -2.0;
+    env3.y_max = 2.0;
+
+    int grid_discretization = 360;
+    std::size_t grid_size = sizeof(int);
+    double dtheta = 2*M_PI / grid_discretization;
+
+    std::vector<double> q3_link_lengths = {1, 1};
+    amp::MyLinkManipulator q3_links(q3_link_lengths);
+    amp::MyGridCSpace grid1(env1, q3_links, grid_discretization);
+    amp::MyGridCSpace grid2(env2, q3_links, grid_discretization);
+    amp::MyGridCSpace grid3(env3, q3_links, grid_discretization);
+
+    double x0, x1;
+
+
+    for (int i = 0; i < grid_discretization; i++) {
+        x0 = dtheta*i;
+        for (int j = 0; j < grid_discretization; j++) {
+            x1 = dtheta*j;
+            grid1(i,j) = grid1.inCollision(x0,x1);
+            grid2(i,j) = grid2.inCollision(x0,x1);
+            grid3(i,j) = grid3.inCollision(x0,x1);
+        }
+    }
+
+    int plot3 = 0;
+    if (plot3) {
+        amp::Visualizer::makeFigure(env1);
+        amp::Visualizer::showFigures();
+        amp::Visualizer::makeFigure(env2);
+        amp::Visualizer::showFigures();
+        amp::Visualizer::makeFigure(env3);
+        amp::Visualizer::showFigures();
+/*
+        amp::Visualizer::makeFigure(grid1);
+        amp::Visualizer::showFigures();
+        amp::Visualizer::makeFigure(grid2);
+        amp::Visualizer::showFigures();
+        amp::Visualizer::makeFigure(grid3);
+        amp::Visualizer::showFigures();
+*/
+    }
 
     // Grade method
-    // amp::HW4::grade<MyLinkManipulator>(constructor, "nonhuman.biologic@myspace.edu", argc, argv);
+    // amp::HW4::grade<MyLinkManipulator>(test_links, "nonhuman.biologic@myspace.edu", argc, argv);
     return 0;
 }

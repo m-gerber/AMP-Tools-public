@@ -77,6 +77,9 @@ class LinkManipulator2D {
 
 class MyLinkManipulator : public LinkManipulator2D {
     public:
+         MyLinkManipulator() : LinkManipulator2D() {
+        }
+
         MyLinkManipulator(const std::vector<double>& link_lengths) : LinkManipulator2D(link_lengths) {
             getLinkLengths() = link_lengths;
         }
@@ -261,6 +264,5 @@ class MyLinkManipulator : public LinkManipulator2D {
 
     private:
 };
-
 
 }

@@ -107,10 +107,10 @@ void amp::Visualizer::makeFigure(const Problem2D& prob, const LinkManipulator2D&
     createAxes(link_manipulator, state);
 }
 
-// void amp::Visualizer::makeFigure(const GridCSpace2D& cspace) {
-//     newFigure();
-//     createAxes(cspace);
-// }
+void amp::Visualizer::makeFigure(const GridCSpace2D& cspace) {
+    newFigure();
+    createAxes(cspace);
+}
 
 void amp::Visualizer::showFigures() {
     ampprivate::pybridge::ScriptCaller::call("FigureHandler", "show_figure", std::make_tuple());
@@ -201,26 +201,26 @@ void amp::Visualizer::createAxes(const LinkManipulator2D& link_manipulator, cons
     ampprivate::pybridge::ScriptCaller::call("VisualizeLinkManipulator", "visualize_manipulator", std::make_tuple(vertices_arg->get()));
 }
 
-// void amp::Visualizer::createAxes(const GridCSpace2D& cspace) {
-//     auto[x0_cells, x1_cells] = cspace.size();
-//     std::unique_ptr<ampprivate::pybridge::PythonObject> x0_cells_arg = ampprivate::pybridge::makeLong(x0_cells);
-//     std::unique_ptr<ampprivate::pybridge::PythonObject> x1_cells_arg = ampprivate::pybridge::makeLong(x1_cells);
+void amp::Visualizer::createAxes(const GridCSpace2D& cspace) {
+    auto[x0_cells, x1_cells] = cspace.size();
+    std::unique_ptr<ampprivate::pybridge::PythonObject> x0_cells_arg = ampprivate::pybridge::makeLong(x0_cells);
+    std::unique_ptr<ampprivate::pybridge::PythonObject> x1_cells_arg = ampprivate::pybridge::makeLong(x1_cells);
     
-//     // Bounds
-//     auto[x0_min, x0_max] = cspace.x0Bounds();
-//     auto[x1_min, x1_max] = cspace.x1Bounds();
-//     std::unique_ptr<ampprivate::pybridge::PythonObject> bounds_arg = workspaceBoundsToPythonObject(x0_min, x0_max, x1_min, x1_max);
+    // Bounds
+    auto[x0_min, x0_max] = cspace.x0Bounds();
+    auto[x1_min, x1_max] = cspace.x1Bounds();
+    std::unique_ptr<ampprivate::pybridge::PythonObject> bounds_arg = workspaceBoundsToPythonObject(x0_min, x0_max, x1_min, x1_max);
 
-//     // Data
-//     const std::vector<bool>& data = cspace.data();
-//     std::vector<std::unique_ptr<ampprivate::pybridge::PythonObject>> data_python_object_ptrs;
-//     data_python_object_ptrs.reserve(data.size());
-//     for (auto bit : data) {
-//         data_python_object_ptrs.push_back(ampprivate::pybridge::makeBool(bit));
-//     }
-//     std::unique_ptr<ampprivate::pybridge::PythonObject> data_arg = ampprivate::pybridge::makeList(std::move(data_python_object_ptrs));
+    // Data
+    const std::vector<bool>& data = cspace.data();
+    std::vector<std::unique_ptr<ampprivate::pybridge::PythonObject>> data_python_object_ptrs;
+    data_python_object_ptrs.reserve(data.size());
+    for (auto bit : data) {
+        data_python_object_ptrs.push_back(ampprivate::pybridge::makeBool(bit));
+    }
+    std::unique_ptr<ampprivate::pybridge::PythonObject> data_arg = ampprivate::pybridge::makeList(std::move(data_python_object_ptrs));
 
-//     ampprivate::pybridge::ScriptCaller::call("VisualizeCSpace", "visualize_grid_cspace_2d", std::make_tuple(x0_cells_arg->get(), x1_cells_arg->get(), bounds_arg->get(), data_arg->get()));
-// }
+    ampprivate::pybridge::ScriptCaller::call("VisualizeCSpace", "visualize_grid_cspace_2d", std::make_tuple(x0_cells_arg->get(), x1_cells_arg->get(), bounds_arg->get(), data_arg->get()));
+}
 
 #endif

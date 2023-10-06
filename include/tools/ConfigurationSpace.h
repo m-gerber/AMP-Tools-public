@@ -2,7 +2,8 @@
 
 #include <vector>
 #include <Eigen/Core>
-#include "AMPCore.h"
+#include "LinkManipulator.h"
+#include "Environment.h"
 
 #include "tools/Serializer.h"
 

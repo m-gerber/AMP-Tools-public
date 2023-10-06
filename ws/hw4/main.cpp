@@ -14,6 +14,10 @@ int main(int argc, char** argv) {
     /* Include this line to have different randomized environments every time you run your code (NOTE: this has no affect on grade()) */
     amp::RNG::seed(amp::RNG::randiUnbounded());
 
+    int plot1 = 0;
+    int plot2 = 0;
+    int plot3 = 0;
+
     std::vector<Eigen::Vector2d> vertices;
 
     vertices.push_back(Eigen::Vector2d(0.0,0.0));
@@ -189,24 +193,27 @@ int main(int argc, char** argv) {
     }
 
     std::vector<amp::Polygon> slice;
-    slice.push_back(C_OBS[11]);
+    slice.push_back(C_OBS[0]);
 
-    int plot1 = 0;
     if (plot1) {
         amp::Visualizer::makeFigure(slice,1);
         amp::Visualizer::makeFigure(C_OBS, heights_3d);
         amp::Visualizer::showFigures();
     }
 
-    amp::ManipulatorState angles;
-    std::vector<double> link_lengths = {8,4,2};
-    amp::MyLinkManipulator test_links(link_lengths);
-    // test_links.getJointLocation(angles,1);
-    angles = test_links.getConfigurationFromIK(Eigen::Vector2d(0,3));
+    amp::ManipulatorState known_angles, IK_angles;
+    std::vector<double> link_lengths1 = {0.5,1,0.5};
+    std::vector<double> link_lengths2 = {1,0.5,1};
+    known_angles = {M_PI/6, M_PI/3,7*M_PI/4};
+    amp::MyLinkManipulator q2_links1(link_lengths1);
+    amp::MyLinkManipulator q2_links2(link_lengths2);
+    
+    IK_angles = q2_links2.getConfigurationFromIK(Eigen::Vector2d(2,0));
 
-    int plot2 = 0;
     if (plot2) {
-        amp::Visualizer::makeFigure(test_links, angles);
+        amp::Visualizer::makeFigure(q2_links1, known_angles);
+        amp::Visualizer::showFigures();
+        amp::Visualizer::makeFigure(q2_links2, IK_angles);
         amp::Visualizer::showFigures();
     }
 
@@ -286,7 +293,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    int plot3 = 0;
     if (plot3) {
         amp::Visualizer::makeFigure(env1);
         amp::Visualizer::showFigures();
@@ -294,17 +300,17 @@ int main(int argc, char** argv) {
         amp::Visualizer::showFigures();
         amp::Visualizer::makeFigure(env3);
         amp::Visualizer::showFigures();
-/*
+
         amp::Visualizer::makeFigure(grid1);
         amp::Visualizer::showFigures();
         amp::Visualizer::makeFigure(grid2);
         amp::Visualizer::showFigures();
         amp::Visualizer::makeFigure(grid3);
         amp::Visualizer::showFigures();
-*/
     }
 
     // Grade method
-    // amp::HW4::grade<MyLinkManipulator>(test_links, "nonhuman.biologic@myspace.edu", argc, argv);
+    amp::MyLinkManipulator constructor;
+    amp::HW4::grade<MyLinkManipulator>(constructor, "mage7128@colorado.edu", argc, argv);
     return 0;
 }

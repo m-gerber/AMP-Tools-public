@@ -66,7 +66,7 @@ class Visualizer {
 
         /// @brief Visualize a grid cspace
         /// @param cspace Dense grid cspace
-        //static void makeFigure(const GridCSpace2D& cspace);
+        static void makeFigure(const GridCSpace2D& cspace);
 
         /// @brief Show all figures that were created with `makeFigure()`
         static void showFigures();
@@ -80,7 +80,7 @@ class Visualizer {
         static void createAxes(const std::vector<Polygon>& polygons, const std::vector<std::string>& labels, bool filled);
         static void createAxes(const std::vector<Polygon>& polygons, const std::vector<double>& heights_3d);
         static void createAxes(const LinkManipulator2D& link_manipulator, const ManipulatorState& state);
-        //static void createAxes(const GridCSpace2D& cspace);
+        static void createAxes(const GridCSpace2D& cspace);
         static void newFigure();
 };
 }

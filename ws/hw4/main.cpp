@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     /* Include this line to have different randomized environments every time you run your code (NOTE: this has no affect on grade()) */
     amp::RNG::seed(amp::RNG::randiUnbounded());
 
-    int plot1 = 0;
+    int plot1 = 1;
     int plot2 = 0;
     int plot3 = 0;
 
@@ -55,8 +55,8 @@ int main(int argc, char** argv) {
 
     vertices.clear();
     vertices.push_back(Eigen::Vector2d(0.0,0.0));
-    vertices.push_back(Eigen::Vector2d(-1.0,-2.0));
-    vertices.push_back(Eigen::Vector2d(0.0,-2.0));
+    vertices.push_back(Eigen::Vector2d(1.0,2.0));
+    vertices.push_back(Eigen::Vector2d(0.0,2.0));
 
     amp::Polygon robot(vertices);
 
@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
             y_curr = robot.verticesCCW()[j][1];
             x_curr_rot = x_curr*cos(angle_rotated) - y_curr*sin(angle_rotated);
             y_curr_rot = x_curr*sin(angle_rotated) + y_curr*cos(angle_rotated);
-            rotated_robot.verticesCCW().push_back(Eigen::Vector2d(x_curr_rot, y_curr_rot));
+            rotated_robot.verticesCCW().push_back(Eigen::Vector2d(-x_curr_rot, -y_curr_rot));
         }
 
         for (int j = 0; j < rotated_robot.verticesCCW().size(); j++) {
@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
                 y_next = rotated_robot.verticesCCW()[j+1][1];
             }
              if (x_next-x_curr != 0) {
-            angle = atan2(y_next-y_curr, x_next-x_curr);
+                angle = atan2(y_next-y_curr, x_next-x_curr);
                 if (angle < 0) angle += 2*M_PI;
             } else if (y_next-y_curr > 0) {
                 angle = M_PI/2;
@@ -125,6 +125,12 @@ int main(int argc, char** argv) {
                 smallest_ind = j;
                 smallest_x   = rotated_robot.verticesCCW()[j][0];
                 smallest_y   = rotated_robot.verticesCCW()[j][1];
+            } else if (rotated_robot.verticesCCW()[j][1] == smallest_y) {
+                if (rotated_robot.verticesCCW()[j][0] < smallest_x) {
+                    smallest_ind = j;
+                    smallest_x   = rotated_robot.verticesCCW()[j][0];
+                    smallest_y   = rotated_robot.verticesCCW()[j][1];
+                }
             }
         }
 
@@ -135,7 +141,8 @@ int main(int argc, char** argv) {
                 smallest_ind = 0;
                 j = 0;
             }
-            vertices.push_back(Eigen::Vector2d(rotated_robot.verticesCCW()[j+smallest_ind][0]-smallest_x,rotated_robot.verticesCCW()[j+smallest_ind][1]-smallest_y));
+            // vertices.push_back(Eigen::Vector2d(rotated_robot.verticesCCW()[j+smallest_ind][0]-smallest_x,rotated_robot.verticesCCW()[j+smallest_ind][1]-smallest_y));
+            vertices.push_back(Eigen::Vector2d(rotated_robot.verticesCCW()[j+smallest_ind][0],rotated_robot.verticesCCW()[j+smallest_ind][1]));
             rotated_robot2_side_angles.push_back(rotated_robot_side_angles[j+smallest_ind]);
             iter++;
         }
@@ -274,24 +281,20 @@ int main(int argc, char** argv) {
     std::size_t grid_size = sizeof(int);
     double dtheta = 2*M_PI / grid_discretization;
 
+    double x0_min = 0;
+    double x0_max = 2*M_PI;
+    double x1_min = 0;
+    double x1_max = 2*M_PI;
+
     std::vector<double> q3_link_lengths = {1, 1};
     amp::MyLinkManipulator q3_links(q3_link_lengths);
-    amp::MyGridCSpace grid1(env1, q3_links, grid_discretization);
-    amp::MyGridCSpace grid2(env2, q3_links, grid_discretization);
-    amp::MyGridCSpace grid3(env3, q3_links, grid_discretization);
+    amp::MyGridCSpace grid1(grid_discretization,grid_discretization,x0_min,x0_max,x1_min,x1_max);
+    amp::MyGridCSpace grid2(grid_discretization,grid_discretization,x0_min,x0_max,x1_min,x1_max);
+    amp::MyGridCSpace grid3(grid_discretization,grid_discretization,x0_min,x0_max,x1_min,x1_max);
 
-    double x0, x1;
-
-
-    for (int i = 0; i < grid_discretization; i++) {
-        x0 = dtheta*i;
-        for (int j = 0; j < grid_discretization; j++) {
-            x1 = dtheta*j;
-            grid1(i,j) = grid1.inCollision(x0,x1);
-            grid2(i,j) = grid2.inCollision(x0,x1);
-            grid3(i,j) = grid3.inCollision(x0,x1);
-        }
-    }
+    amp::MyGridCSpace grid11 = grid1.buildCSpace(q3_links, env1);
+    amp::MyGridCSpace grid22 = grid2.buildCSpace(q3_links, env2);
+    amp::MyGridCSpace grid33 = grid3.buildCSpace(q3_links, env3);
 
     if (plot3) {
         amp::Visualizer::makeFigure(env1);
@@ -309,8 +312,8 @@ int main(int argc, char** argv) {
         amp::Visualizer::showFigures();
     }
 
+    // MyGridCSpace2DConstructor constructor;
     // Grade method
-    amp::MyLinkManipulator constructor;
-    amp::HW4::grade<MyLinkManipulator>(constructor, "mage7128@colorado.edu", argc, argv);
+    // amp::HW4::grade<MyLinkManipulator>(constructor, "mage7128@colorado.edu", argc, argv);
     return 0;
 }

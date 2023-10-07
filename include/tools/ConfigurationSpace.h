@@ -110,14 +110,34 @@ class GridCSpace2D : public ConfigurationSpace2D, public DenseArray2D<bool> {
         virtual ~GridCSpace2D() {}
 };
 
-class MyGridCSpace : public amp::GridCSpace2D {
+class MyGridCSpace : public GridCSpace2D {
     public:
+        MyGridCSpace();
     
-        MyGridCSpace(const amp::Environment2D environment, const amp::MyLinkManipulator links, std::size_t grid_size)
-        : GridCSpace2D(grid_size, grid_size, environment.x_min, environment.x_max, environment.y_min, environment.y_max)
-        {
-            environment_ = environment;
-            links_ = links;
+        MyGridCSpace(std::size_t x0_cells, std::size_t x1_cells, double x0_min, double x0_max, double x1_min, double x1_max)
+        : GridCSpace2D(x0_cells, x1_cells, x0_min, x0_max, x1_min, x1_max) 
+        , denseArray(x0_cells, x1_cells) {}
+
+        amp::MyGridCSpace buildCSpace(amp::MyLinkManipulator links, amp::Environment2D env) {
+            environment_ = env;
+            links_ = links; 
+
+            amp::MyGridCSpace temp_grid(360,360,0,2*M_PI,0,2*M_PI);
+
+            int grid_discretization = denseArray.size().first;
+            double dtheta = 2*M_PI / grid_discretization;
+
+            double x0, x1;
+
+            for (int i = 0; i < grid_discretization; i++) {
+                x0 = dtheta*i;
+                for (int j = 0; j < grid_discretization; j++) {
+                    x1 = dtheta*j;
+                    denseArray(i,j) = inCollision(x0,x1);
+                    temp_grid(i,j) = inCollision(x0,x1);
+                }
+            }
+            return temp_grid;
         }
 
         bool inCollision(double angle0, double angle1) const override {
@@ -194,6 +214,7 @@ class MyGridCSpace : public amp::GridCSpace2D {
     private:
         amp::MyLinkManipulator links_;
         amp::Environment2D environment_;
+        amp::DenseArray2D<bool> denseArray;
 };
 
 }

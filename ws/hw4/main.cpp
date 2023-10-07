@@ -26,6 +26,8 @@ int main(int argc, char** argv) {
     
     amp::Polygon obstacle(vertices);
 
+    
+
     double x_curr, y_curr;
     double x_next, y_next;
     double angle;
@@ -35,7 +37,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < obstacle.verticesCCW().size(); i++) {
         x_curr = obstacle.verticesCCW()[i][0];
         y_curr = obstacle.verticesCCW()[i][1];
-        if (i == obstacle.verticesCCW().size()) {
+        if (i == obstacle.verticesCCW().size()-1) {
             x_next = obstacle.verticesCCW()[0][0];
             y_next = obstacle.verticesCCW()[0][1];
         } else {
@@ -99,7 +101,7 @@ int main(int argc, char** argv) {
         for (int j = 0; j < rotated_robot.verticesCCW().size(); j++) {
             x_curr = rotated_robot.verticesCCW()[j][0];
             y_curr = rotated_robot.verticesCCW()[j][1];
-            if (j == rotated_robot.verticesCCW().size()) {
+            if (j == rotated_robot.verticesCCW().size()-1) {
                 x_next = rotated_robot.verticesCCW()[0][0];
                 y_next = rotated_robot.verticesCCW()[0][1];
             } else {
@@ -114,6 +116,7 @@ int main(int argc, char** argv) {
             } else {
                 angle = 3*M_PI/2;
             }
+            
             rotated_robot_side_angles.push_back(angle);
         }
 

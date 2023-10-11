@@ -6,20 +6,31 @@
 //     double m_Q_star = Q_star;
 // }
 
-double distance2point(Eigen::Vector2d point1, Eigen::Vector2d point2) {
+Eigen::Vector2d amp::MyGDAlgo::distance2point(Eigen::Vector2d point1, Eigen::Vector2d point2) {
     double x1 = point1[0];
     double y1 = point1[1];
     double x2 = point2[0];
     double y2 = point2[1];
     
-    return sqrt( (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) );
+    return Eigen::Vector2d(sqrt( (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) ), atan2(y2-y1,x2-x1));
 }
 
-double U_att(const amp::Problem2D& problem, double d_goal) {
-
+Eigen::Vector2d amp::MyGDAlgo::Grad_U_att(Eigen::Vector2d d_goal) {
+    return Eigen::Vector2d(0.0,0.0);
 }
 
-bool nearFacet(Eigen::Vector2d point, Eigen::Vector2d p1, Eigen::Vector2d p2) {
+bool amp::MyGDAlgo::primitiveCheck(Eigen::Vector2d point, double slope, Eigen::Vector2d intercept, int gt) {
+    return ((gt % 2 == 1) ? -1 : 1) * ( (point[1] - intercept[1]) - slope * (point[0] - intercept[0]) ) <= 0;
+}
+
+double amp::MyGDAlgo::distance2facet(Eigen::Vector2d point, double slope, Eigen::Vector2d intercept) {
+    double a = 1;
+    double b = -slope;
+    double c = -intercept[1] + slope*intercept[0];
+    return std::abs(a*point[0] + b*point[1] + c) / sqrt(a*a + b*b);
+}
+
+double amp::MyGDAlgo::nearFacet(Eigen::Vector2d point, Eigen::Vector2d p1, Eigen::Vector2d p2) {
     double x_curr, y_curr, x_next, y_next;
     double angle, slope, inv_slope;
 
@@ -33,20 +44,36 @@ bool nearFacet(Eigen::Vector2d point, Eigen::Vector2d p1, Eigen::Vector2d p2) {
     slope = (y_next-y_curr) / (x_next-x_curr);
     inv_slope = -1/slope;
     if (x_next > x_curr) {
-        // want to use less than
-        if (angle > 0) {
-            // want to use greater than x_curr and less than x_next
-        } else if (angle <= 0) {
-            // want to use less than x_curr and greater than x_next
+        if (primitiveCheck(point, slope, p1, 0)) {
+            if (angle > 0) {
+                if (primitiveCheck(point, inv_slope, p1, 1) && primitiveCheck(point, inv_slope, p2, 0)) {
+                    return distance2facet(point, slope, p1);
+                }
+            } else if (angle <= 0) {
+                if (primitiveCheck(point, inv_slope, p1, 0) && primitiveCheck(point, inv_slope, p2, 1)) {
+                    return distance2facet(point, slope, p1);
+                }
+            }
         }
     } else if (x_next < x_curr) {
-        // want to use greater than
+        if (primitiveCheck(point, slope, p1, 1)) {
+            if (angle > 0) {
+                if (primitiveCheck(point, inv_slope, p1, 1) && primitiveCheck(point, inv_slope, p2, 0)) {
+                    return distance2facet(point, slope, p1);
+                }
+            } else if (angle <= 0) {
+                if (primitiveCheck(point, inv_slope, p1, 0) && primitiveCheck(point, inv_slope, p2, 1)) {
+                    return distance2facet(point, slope, p1);
+                }
+            }
+        }
     }
+    return 0;
 }
 
-std::vector<double> distance2obs(const amp::Problem2D& problem, Eigen::Vector2d point) {
+std::vector<Eigen::Vector2d> amp::MyGDAlgo::distance2obs(const amp::Problem2D& problem, Eigen::Vector2d point) {
 
-    std::vector<double> d_obs;
+    std::vector<Eigen::Vector2d> d_obs;
 
     double x = point[0];
     double y = point[1];
@@ -56,15 +83,15 @@ std::vector<double> distance2obs(const amp::Problem2D& problem, Eigen::Vector2d 
 
     Eigen::Vector2d p1, p2;
 
-    double dist_x, dist_y, dist2obs;
+    double dist2obs, dist2facet, dist2vertex;
     double x_curr, y_curr, x_next, y_next;
     double angle, slope, inv_slope;
-
-    double dist2facet = 0;
 
     for (int i = 0; i < num_obstacles; i++) {
         num_vertices =  problem.obstacles[i].verticesCCW().size();
         p1 = Eigen::Vector2d(problem.obstacles[i].verticesCCW().back()[0],problem.obstacles[i].verticesCCW().back()[1]);
+        dist2facet = 0;
+        dist2vertex = distance2point(point, p1)[0];
         for (int j = 0; j < num_vertices; j++) {
             if (j > 0) {
                 p1 = Eigen::Vector2d(problem.obstacles[i].verticesCCW()[j][0],problem.obstacles[i].verticesCCW()[j][1]);
@@ -74,21 +101,24 @@ std::vector<double> distance2obs(const amp::Problem2D& problem, Eigen::Vector2d 
             }
             dist2facet = nearFacet(point,p1,p2);
             if (dist2facet != 0) {
-                // find distance to facet
+                dist2obs = dist2facet;
                 break;
             }
+            if (distance2point(point, p1)[0] < dist2vertex) {
+                dist2vertex = distance2point(point, p1)[0];
+            }
         }
-
-        d_obs.push_back(dist2obs);
+        if (dist2facet == 0) dist2obs = dist2vertex;
+        d_obs.push_back(Eigen::Vector2d(dist2obs,0));
     }
     return d_obs;
 }
 
-double U_rep(const amp::Problem2D& problem, std::vector<double> d_obs) {
-
+Eigen::Vector2d amp::MyGDAlgo::Grad_U_rep(std::vector<Eigen::Vector2d> d_obs) {
+    return Eigen::Vector2d(0.0,0.0);
 }
 
-amp::Path2D plan(const amp::Problem2D& problem) {
+amp::Path2D amp::MyGDAlgo::plan(const amp::Problem2D& problem) {
 
     amp::Path2D myPlan;
 
@@ -101,7 +131,7 @@ amp::Path2D plan(const amp::Problem2D& problem) {
     double delta = 1e-2;
     int iter = 0;
     
-    double dist2goal = distance2point(start, goal);
+    double dist2goal = distance2point(start, goal)[0];
 
     while (dist2goal > delta && iter < 1000) {
 
@@ -111,7 +141,7 @@ amp::Path2D plan(const amp::Problem2D& problem) {
 
 
         iter++;
-        dist2goal = distance2point(myPlan.waypoints.back(), goal);
+        dist2goal = distance2point(myPlan.waypoints.back(), goal)[0];
     }
 
     return myPlan;

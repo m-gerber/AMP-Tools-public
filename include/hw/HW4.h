@@ -23,18 +23,6 @@ class GridCSpace2DConstructor {
         virtual ~GridCSpace2DConstructor() {}
 };
 
-class MyGridCSpace2DConstructor : public GridCSpace2DConstructor {
-    public:
-        std::unique_ptr<amp::GridCSpace2D> construct(const amp::LinkManipulator2D& manipulator, const amp::Environment2D& env) override {
-            // std::unique_ptr<amp::MyGridCSpace> ptr(new MyGridCSpace(360,360,0,2*M_PI,0,2*M_PI));
-            // ptr->MyGridCSpace(manipulator.getLinkLengths(), env);
-            std::unique_ptr<amp::MyGridCSpace> ptr(new MyGridCSpace(360,360,0,2*M_PI,0,2*M_PI));
-            ptr->buildCSpace(manipulator.getLinkLengths(), env);
-
-            return ptr;
-        }
-};
-
 class HW4 {
     public:
         /// @brief Get triangle obstacle described in Exercise 1

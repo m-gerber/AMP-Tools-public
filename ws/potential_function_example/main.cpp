@@ -3,7 +3,6 @@
 // This includes all of the necessary header files in the toolbox
 #include "AMPCore.h"
 
-
 class MyPotentialFunction : public amp::PotentialFunction2D {
     public:
         virtual double operator()(const Eigen::Vector2d& q) const override {

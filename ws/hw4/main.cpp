@@ -3,6 +3,8 @@
 
 // Include the correct homework header
 #include "hw/HW4.h"
+#include "MyLinkManipulator.h"
+#include "MyGridCSpace2DConstructor.h"
 
 // Include the header of the shared class
 #include "HelpfulClass.h"
@@ -15,8 +17,8 @@ int main(int argc, char** argv) {
     amp::RNG::seed(amp::RNG::randiUnbounded());
 
     int plot1 = 1;
-    int plot2 = 0;
-    int plot3 = 0;
+    int plot2 = 1;
+    int plot3 = 1;
 
     std::vector<Eigen::Vector2d> vertices;
 
@@ -25,8 +27,6 @@ int main(int argc, char** argv) {
     vertices.push_back(Eigen::Vector2d(0.0,2.0));
     
     amp::Polygon obstacle(vertices);
-
-    
 
     double x_curr, y_curr;
     double x_next, y_next;

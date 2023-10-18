@@ -130,9 +130,9 @@ std::vector<Eigen::Vector2d> amp::MyGDAlgo::distance2obs(const amp::Problem2D& p
                 dist2obs = dist2facet;
                 break;
             }
-            std::cout << "x_v,y_v: " << p1[0] << "," << p1[1] << std::endl;
-            std::cout << "x_r,y_r: " << point[0] << "," << point[1] << std::endl;
-            std::cout << "dist, angle: " << distance2point(p1, point)[0] << "," << distance2point(p1, point)[1] << std::endl << std::endl;
+            // std::cout << "x_v,y_v: " << p1[0] << "," << p1[1] << std::endl;
+            // std::cout << "x_r,y_r: " << point[0] << "," << point[1] << std::endl;
+            // std::cout << "dist, angle: " << distance2point(p1, point)[0] << "," << distance2point(p1, point)[1] << std::endl << std::endl;
             //PAUSE; 
             if (distance2point(p1, point)[0] < dist2vertex[0]) {
                 dist2vertex = distance2point(p1, point);
@@ -152,7 +152,7 @@ Eigen::Vector2d amp::MyGDAlgo::Grad_U_rep(const amp::Problem2D& problem, Eigen::
 
     for (int i = 0; i < d_obs.size(); i++) {
         if (d_obs[i][0] < m_Q_star) {
-            std::cout << "d_obs, angle: " << d_obs[i][0] << "," << d_obs[i][1] << std::endl;
+            // std::cout << "d_obs, angle: " << d_obs[i][0] << "," << d_obs[i][1] << std::endl;
             x_step += -m_eta * (1/m_Q_star - 1/d_obs[i][0]) / d_obs[i][0] / d_obs[i][0] * cos(d_obs[i][1]);
             y_step += -m_eta * (1/m_Q_star - 1/d_obs[i][0]) / d_obs[i][0] / d_obs[i][0] * sin(d_obs[i][1]);
         } else {
@@ -176,7 +176,7 @@ amp::Path2D amp::MyGDAlgo::plan(const amp::Problem2D& problem) {
 
     myPlan.waypoints.push_back(start);
     
-    double delta = 1e-2;
+    double delta = 0.25;
     int iter = 0;
 
     double x_new, y_new;
@@ -184,7 +184,7 @@ amp::Path2D amp::MyGDAlgo::plan(const amp::Problem2D& problem) {
     
     double dist2goal = distance2point(start, goal)[0];
 
-    while (dist2goal > delta && iter < 10000) {
+    while (dist2goal > delta && iter < 2000) {
 
         point_curr = myPlan.waypoints.back();
 

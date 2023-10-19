@@ -33,8 +33,6 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
     double cell_size_x0 = (x0_bounds.second-x0_bounds.first) / num_cells.first;
     double cell_size_x1 = (x1_bounds.second-x1_bounds.first) / num_cells.second;
 
-    std::cout << "goal: " << grid_cspace.operator()(goal_cell.first,goal_cell.second) << std::endl;
-
     std::pair<double, double> curr_pos = goal_cell;
 
     std::vector<std::vector<amp::cell>> graph;
@@ -47,11 +45,11 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
     std::queue<std::pair<double, double>> q;
     q.push(curr_pos);
 
-    int dx[] = { -1, 0, 1, 0 };
-    int dy[] = { 0, 1, 0, -1 };
+    int dx[] = { -1, 0, 1,  0 };
+    int dy[] = {  0, 1, 0, -1 };
     std::pair<double, double> new_pos;
 
-    while(curr_pos.first != init_cell.first && curr_pos.second != init_cell.second) {
+    while((curr_pos.first != init_cell.first && curr_pos.second != init_cell.second) && !q.empty()) {
         curr_pos = q.front();
         q.pop();
 
@@ -76,10 +74,14 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
         for (int i = 0; i < 4; i++) {
             new_pos.first = curr_pos.first + dx[i];
             new_pos.second = curr_pos.second + dy[i];
-            if (graph[new_pos.first][new_pos.second].val < graph[curr_pos.first][curr_pos.second].val) curr_pos = new_pos;
+            if (graph[new_pos.first][new_pos.second].val < graph[curr_pos.first][curr_pos.second].val) {
+                curr_pos = new_pos;
+                break;
+            } 
         }
     }
 
+    path.waypoints.push_back(Eigen::Vector2d(q_init[0], q_init[1]));
     path.waypoints.push_back(Eigen::Vector2d(q_goal[0], q_goal[1]));
 
     return path;

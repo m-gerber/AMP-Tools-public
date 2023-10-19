@@ -15,7 +15,7 @@ std::unique_ptr<amp::GridCSpace2D> amp::MyPointWFAlgo::constructDiscretizedWorks
 }
 
 int amp::MyPointWFAlgo::isValid(std::pair<int, int> inds, std::vector<std::vector<amp::cell>> graph, const amp::GridCSpace2D& grid_cspace) {
-    if (inds.first < 0 || inds.second < 0 || inds.first > graph.size() || inds.second > graph[0].size()) return 0;
+    if (inds.first < 0 || inds.second < 0 || inds.first > graph.size()-1 || inds.second > graph[0].size()-1) return 0;
     if (grid_cspace.operator()(inds.first,inds.second)) return -1;
     if (graph[inds.first][inds.second].visited) return 0;
     return 1;
@@ -23,17 +23,22 @@ int amp::MyPointWFAlgo::isValid(std::pair<int, int> inds, std::vector<std::vecto
 
 amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, const Eigen::Vector2d& q_goal, const amp::GridCSpace2D& grid_cspace) {
 
-    std::pair<double, double> x0_bounds = grid_cspace.x0Bounds();
-    std::pair<double, double> x1_bounds = grid_cspace.x1Bounds();
+    std::pair<int, int> x0_bounds = grid_cspace.x0Bounds();
+    std::pair<int, int> x1_bounds = grid_cspace.x1Bounds();
 
-    std::pair<double, double> num_cells = grid_cspace.size();
-    std::pair<double, double> goal_cell = grid_cspace.getCellFromPoint(q_goal[0], q_goal[1]);
-    std::pair<double, double> init_cell = grid_cspace.getCellFromPoint(q_init[0], q_init[1]);
+    std::pair<int, int> num_cells = grid_cspace.size();
+    std::pair<int, int> goal_cell = grid_cspace.getCellFromPoint(q_goal[0], q_goal[1]);
+    std::pair<int, int> init_cell = grid_cspace.getCellFromPoint(q_init[0], q_init[1]);
 
-    double cell_size_x0 = (x0_bounds.second-x0_bounds.first) / num_cells.first;
-    double cell_size_x1 = (x1_bounds.second-x1_bounds.first) / num_cells.second;
+    // std::cout << "goal_point: " << goal_cell.first << "," << goal_cell.second << std::endl;
+    // std::cout << "goal_point: " << q_goal[0] << "," << q_goal[1] << std::endl;
+    // std::cout << "init_point: " << init_cell.first << "," << init_cell.second << std::endl;
+    // std::cout << "init_point: " << q_init[0] << "," << q_init[1] << std::endl;
 
-    std::pair<double, double> curr_pos = goal_cell;
+    double cell_size_x0 = (x0_bounds.second-x0_bounds.first) / static_cast<double>(num_cells.first);
+    double cell_size_x1 = (x1_bounds.second-x1_bounds.first) / static_cast<double>(num_cells.second);
+
+    std::pair<int, int> curr_pos = goal_cell;
 
     std::vector<std::vector<amp::cell>> graph;
     graph.resize(num_cells.first);
@@ -41,15 +46,19 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
 
     graph[curr_pos.first][curr_pos.second].visited = 1;
     graph[curr_pos.first][curr_pos.second].val = 2;
+    graph[curr_pos.first][curr_pos.second].parent = {-1,-1};
 
-    std::queue<std::pair<double, double>> q;
+    std::queue<std::pair<int, int>> q;
     q.push(curr_pos);
 
     int dx[] = { -1, 0, 1,  0 };
     int dy[] = {  0, 1, 0, -1 };
-    std::pair<double, double> new_pos;
+    std::pair<int, int> new_pos;
 
-    while((curr_pos.first != init_cell.first && curr_pos.second != init_cell.second) && !q.empty()) {
+    int iter1 = 0;
+
+    while((curr_pos != init_cell) && !q.empty()) {
+        iter1++;
         curr_pos = q.front();
         q.pop();
 
@@ -60,6 +69,8 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
                 q.push({new_pos.first, new_pos.second});
                 graph[new_pos.first][new_pos.second].visited = true;
                 graph[new_pos.first][new_pos.second].val = graph[curr_pos.first][curr_pos.second].val + 1;
+                graph[new_pos.first][new_pos.second].parent = curr_pos;
+                graph[curr_pos.first][curr_pos.second].child = new_pos;
             } else if (isValid({new_pos.first, new_pos.second}, graph, grid_cspace) == -1) {
                 graph[new_pos.first][new_pos.second].visited = true;
                 graph[new_pos.first][new_pos.second].val = 1;
@@ -68,20 +79,21 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
     }
 
     amp::Path2D path;
-    
-    while (curr_pos != goal_cell) {
-        path.waypoints.push_back(Eigen::Vector2d(curr_pos.first*cell_size_x0,curr_pos.second*cell_size_x1));
-        for (int i = 0; i < 4; i++) {
-            new_pos.first = curr_pos.first + dx[i];
-            new_pos.second = curr_pos.second + dy[i];
-            if (graph[new_pos.first][new_pos.second].val < graph[curr_pos.first][curr_pos.second].val) {
-                curr_pos = new_pos;
-                break;
-            } 
-        }
-    }
+    int iter2 = 0;
 
     path.waypoints.push_back(Eigen::Vector2d(q_init[0], q_init[1]));
+
+    while (curr_pos != goal_cell || iter2 == iter1) {
+        iter2++;
+        // std::cout << "curr_pos: " << curr_pos.first << "," << curr_pos.second << std::endl;
+        // std::cout << "curr_point: " << graph[curr_pos.first][curr_pos.second].val << std::endl;
+        // std::cout << "curr_point: " << graph[curr_pos.first][curr_pos.second].parent.first << "," << graph[curr_pos.first][curr_pos.second].parent.second << std::endl;
+        //PAUSE;
+        path.waypoints.push_back(Eigen::Vector2d(curr_pos.first*cell_size_x0 + x0_bounds.first,curr_pos.second*cell_size_x1 + x1_bounds.first));
+        curr_pos = graph[curr_pos.first][curr_pos.second].parent;
+    }
+
+    // path.waypoints.push_back(Eigen::Vector2d(q_init[0], q_init[1]));
     path.waypoints.push_back(Eigen::Vector2d(q_goal[0], q_goal[1]));
 
     return path;

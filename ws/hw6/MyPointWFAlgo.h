@@ -11,6 +11,8 @@ namespace amp {
 struct cell {
     bool visited = 0;
     int val = 0;
+    std::pair<int, int> parent;
+    std::pair<int, int> child;
 };
 
 class MyPointWFAlgo : public amp::PointWaveFrontAlgorithm {

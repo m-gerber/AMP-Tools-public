@@ -4,15 +4,26 @@ void amp::MyGridCSpace::buildPointCSpace(amp::Environment2D env) {
     env_ = env;
 
     int grid_discretization = size().first;
-    double dtheta = 2*M_PI / grid_discretization;
+    double dtheta1 = (env.x_max-env.x_min) / grid_discretization;
+    double dtheta2 = (env.y_max-env.y_min) / grid_discretization;
 
     double x0, x1;
+    bool isIn;
+
+    int dx[] = { -1, 0, 1,  0 };
+    int dy[] = {  0, 1, 0, -1 };
 
     for (int i = 0; i < grid_discretization; i++) {
-        x0 = dtheta*i;
+        x0 = env.x_min + dtheta1*i;
         for (int j = 0; j < grid_discretization; j++) {
-            x1 = dtheta*j;
+            x1 = env.y_min + dtheta2*j;
+            isIn = inPolygon(x0,x1);
             operator()(i,j) = inPolygon(x0,x1);
+            if (isIn) {
+                for (int k = 0; k < 4; k++) {
+                    operator()(i+dx[k],j+dy[k]) = 1;
+                }
+            }
         }
     }
 }

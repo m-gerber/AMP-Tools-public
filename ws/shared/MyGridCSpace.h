@@ -27,12 +27,14 @@ class MyGridCSpace : public GridCSpace2D {
             double dx0 = x0_max_ - x0_min_;
             double dx1 = x1_max_ - x1_min_;
 
-            int ind_x0 = ceil(x0 / dx0 * x0_cells_);
-            int ind_x1 = ceil(x1 / dx1 * x1_cells_);
+            int most_neg0 = floor(x0_min_ / dx0 * x0_cells_);
+            int most_neg1 = floor(x1_min_ / dx1 * x1_cells_);
+
+            int ind_x0 = floor(x0 / dx0 * x0_cells_) - most_neg0;
+            int ind_x1 = floor(x1 / dx1 * x1_cells_) - most_neg1;
 
             return {ind_x0, ind_x1};
         }
-        
     private:
         amp::MyLinkManipulator links_;
         amp::Environment2D env_;

@@ -16,8 +16,8 @@ int main(int argc, char** argv) {
     /* Include this line to have different randomized environments every time you run your code (NOTE: this has no affect on grade()) */
     amp::RNG::seed(amp::RNG::randiUnbounded());
 
-    int plot1 = 1;
-    int plot2 = 1;
+    int plot1 = 0;
+    int plot2 = 0;
     int plot3 = 1;
 
     std::vector<Eigen::Vector2d> vertices;
@@ -214,7 +214,7 @@ int main(int argc, char** argv) {
     amp::ManipulatorState known_angles, IK_angles;
     std::vector<double> link_lengths1 = {0.5,1,0.5};
     std::vector<double> link_lengths2 = {1,0.5,1};
-    known_angles = {M_PI/6, M_PI/3,7*M_PI/4};
+    known_angles << M_PI/6, M_PI/3,7*M_PI/4;
     amp::MyLinkManipulator q2_links1(link_lengths1);
     amp::MyLinkManipulator q2_links2(link_lengths2);
     
@@ -295,9 +295,9 @@ int main(int argc, char** argv) {
     amp::MyGridCSpace grid2(grid_discretization,grid_discretization,x0_min,x0_max,x1_min,x1_max);
     amp::MyGridCSpace grid3(grid_discretization,grid_discretization,x0_min,x0_max,x1_min,x1_max);
 
-    amp::MyGridCSpace grid11 = grid1.buildCSpace(q3_links, env1);
-    amp::MyGridCSpace grid22 = grid2.buildCSpace(q3_links, env2);
-    amp::MyGridCSpace grid33 = grid3.buildCSpace(q3_links, env3);
+    grid1.buildLinkCSpace(q3_links, env1);
+    grid2.buildLinkCSpace(q3_links, env2);
+    grid3.buildLinkCSpace(q3_links, env3);
 
     if (plot3) {
         amp::Visualizer::makeFigure(env1);

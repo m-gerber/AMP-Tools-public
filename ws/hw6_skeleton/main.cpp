@@ -5,8 +5,8 @@ using namespace amp;
 
 class MyGridCSpace : public amp::GridCSpace2D {
     public:
-        //MyGridCSpace()
-        //    : amp::GridCSpace2D(1, 1, 0.0, 1.0, 0.0, 1.0) {}
+        MyGridCSpace()
+           : amp::GridCSpace2D(1, 1, 0.0, 1.0, 0.0, 1.0) {}
         MyGridCSpace(std::size_t x0_cells, std::size_t x1_cells, double x0_min, double x0_max, double x1_min, double x1_max)
             : amp::GridCSpace2D(x0_cells, x1_cells, x0_min, x0_max, x1_min, x1_max) {}
 
@@ -25,7 +25,7 @@ class MyCSpaceCtor : public amp::GridCSpace2DConstructor {
 class MyPointWFAlgo : public amp::PointWaveFrontAlgorithm {
     public:
         virtual std::unique_ptr<amp::GridCSpace2D> constructDiscretizedWorkspace(const amp::Environment2D& environment) override {
-            return std::make_unique<MyGridCSpace>(1, 1, 0.0, 1.0, 0.0, 1.0);
+            return std::make_unique<MyGridCSpace>(360, 360, 0.0, 2*M_PI, 0.0, 2*M_PI);
         }
 
         // This is just to get grade to work, you DO NOT need to override this method
@@ -47,7 +47,7 @@ class MyManipWFAlgo : public amp::ManipulatorWaveFrontAlgorithm {
 
         // You can have custom ctor params for all of these classes
         MyManipWFAlgo(const std::string& beep) 
-            : amp::ManipulatorWaveFrontAlgorithm(std::make_shared<MyCSpaceCtor>()) {LOG("construcing... " << beep);}
+            : amp::ManipulatorWaveFrontAlgorithm(std::make_shared<MyCSpaceCtor>()) {LOG("constructing... " << beep);}
 
         // This is just to get grade to work, you DO NOT need to override this method
         virtual amp::ManipulatorTrajectory2Link plan(const LinkManipulator2D& link_manipulator_agent, const amp::Problem2D& problem) override {

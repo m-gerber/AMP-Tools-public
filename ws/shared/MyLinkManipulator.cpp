@@ -72,6 +72,7 @@ amp::ManipulatorState amp::MyLinkManipulator::getConfigurationFromIK(const Eigen
     double theta1, theta2, theta3;
 
     amp::ManipulatorState angles;
+    angles << -1;
     std::vector<Eigen::Vector2d> valid_points;
     double x_j1, y_j1, x_j2, y_j2;
     double mag_A, mag_B, dot_AB;
@@ -80,15 +81,14 @@ amp::ManipulatorState amp::MyLinkManipulator::getConfigurationFromIK(const Eigen
     switch(num_links) {
         case 1:
             if (dist == a0) {
-                angles.push_back(atan2(y_e,x_e));
+                angles << atan2(y_e,x_e);
             }
             break;
         case 2:
             a1 = getLinkLengths()[1];
             theta2 = atan2(t2_sin(x_e,y_e,a0,a1),t2_cos(x_e,y_e,a0,a1));
             theta1 = atan2(t1_sin(x_e,y_e,a0,a1,theta2),t1_cos(x_e,y_e,a0,a1,theta2));
-            angles.push_back(theta1);
-            angles.push_back(theta2);
+            angles << theta1, theta2;
             break;
         case 3:
             a1 = getLinkLengths()[1];
@@ -128,17 +128,11 @@ amp::ManipulatorState amp::MyLinkManipulator::getConfigurationFromIK(const Eigen
             if (angle_B < 0) angle_B += 2*M_PI;
             if (angle_B < angle_A) theta3 = -theta3;
 
-            angles.push_back(theta1);
-            angles.push_back(theta2);
-            angles.push_back(theta3);
+            angles << theta1, theta2, theta3;
             break;
         default:
             std::cout << "Too many links." << std::endl;
             break;
-    }
-
-    if (angles.empty()) {
-        std::cout << "Target is outside of reachable range." << std::endl;
     }
 
     return angles;

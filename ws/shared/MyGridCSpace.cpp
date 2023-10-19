@@ -1,12 +1,9 @@
 #include "MyGridCSpace.h"
 
-amp::MyGridCSpace amp::MyGridCSpace::buildCSpace(amp::MyLinkManipulator links, amp::Environment2D env) {
-    environment_ = env;
-    links_ = links; 
+void amp::MyGridCSpace::buildPointCSpace(amp::Environment2D env) {
+    env_ = env;
 
-    amp::MyGridCSpace temp_grid(360, 360, 0 , 2*M_PI, 0, 2*M_PI);
-
-    int grid_discretization = denseArray.size().first;
+    int grid_discretization = size().first;
     double dtheta = 2*M_PI / grid_discretization;
 
     double x0, x1;
@@ -15,15 +12,70 @@ amp::MyGridCSpace amp::MyGridCSpace::buildCSpace(amp::MyLinkManipulator links, a
         x0 = dtheta*i;
         for (int j = 0; j < grid_discretization; j++) {
             x1 = dtheta*j;
-            denseArray(i,j) = inCollision(x0,x1);
-            temp_grid(i,j) = inCollision(x0,x1);
+            operator()(i,j) = inPolygon(x0,x1);
         }
     }
-    return temp_grid;
 }
 
-bool amp::MyGridCSpace::inCollision(double angle0, double angle1) const {
-    amp::ManipulatorState state = {angle0,angle1};
+bool amp::MyGridCSpace::inPolygon(double x_pos, double y_pos) const {
+    // Define ints to hold values for the number of obstacles in the environment and the number of 
+    // vertices for each of those obstacles
+    int num_obstacles = env_.obstacles.size();
+    int num_vertices;
+
+    bool inside = false;
+
+    double x1, y1, x2, y2;
+
+    for (int i = 0; i < num_obstacles; i++) {
+        num_vertices = env_.obstacles[i].verticesCCW().size();
+        for (int j = 0; j < num_vertices; j++) {
+            x1 = env_.obstacles[i].verticesCCW()[j][0];
+            y1 = env_.obstacles[i].verticesCCW()[j][1];
+            x2 = env_.obstacles[i].verticesCCW()[j+1][0];
+            y2 = env_.obstacles[i].verticesCCW()[j+1][1];
+            if (j == num_vertices-1) {
+                x2 = env_.obstacles[i].verticesCCW()[0][0];
+                y2 = env_.obstacles[i].verticesCCW()[0][1];
+            }
+            if (y_pos > std::fmin(y1,y2)) {
+                if (y_pos <= std::fmax(y1,y2)){
+                    if (x_pos <= std::fmax(x1,x2)) {
+                        // Compute the location of the x-intercept on the line
+                        double x_int = (x2-x1) * ((y_pos-y1) / (y2-y1)) + x1;
+                        if (x2 == x1 || x_pos <= x_int) {
+                            inside = !inside;
+                        }
+                    }
+                }
+            }
+        } if (inside) return inside;
+    }
+    return inside;
+}
+
+void amp::MyGridCSpace::buildLinkCSpace(amp::MyLinkManipulator links, amp::Environment2D env) {
+    env_ = env;
+    links_ = links; 
+
+    int grid_discretization = size().first;
+    double dtheta = 2*M_PI / grid_discretization;
+
+    double x0, x1;
+
+    for (int i = 0; i < grid_discretization; i++) {
+        x0 = dtheta*i;
+        for (int j = 0; j < grid_discretization; j++) {
+            x1 = dtheta*j;
+            operator()(i,j) = collisionChecker(x0,x1);
+        }
+    }
+}
+
+bool amp::MyGridCSpace::collisionChecker(double angle0, double angle1) const {
+    amp::ManipulatorState state(2);
+    state <<  angle0, angle1;
+
     Eigen::Vector2d j1 = links_.getJointLocation(state,1);
     Eigen::Vector2d j2 = links_.getJointLocation(state,2);
 
@@ -40,21 +92,21 @@ bool amp::MyGridCSpace::inCollision(double angle0, double angle1) const {
     double slope1, slope2;
     double x1_y3, x1_y4, x2_y3, x2_y4;
 
-    int num_obstacles = environment_.obstacles.size();
+    int num_obstacles = env_.obstacles.size();
     int num_vertices;
 
     bool collision = false;
 
     for (int i = 0; i < num_obstacles; i++) {
-        num_vertices = environment_.obstacles[i].verticesCCW().size();
+        num_vertices = env_.obstacles[i].verticesCCW().size();
         for (int j = 0; j < num_vertices; j++) {
-            x3 = environment_.obstacles[i].verticesCCW()[j][0];
-            y3 = environment_.obstacles[i].verticesCCW()[j][1];
-            x4 = environment_.obstacles[i].verticesCCW()[j+1][0];
-            y4 = environment_.obstacles[i].verticesCCW()[j+1][1];
+            x3 = env_.obstacles[i].verticesCCW()[j][0];
+            y3 = env_.obstacles[i].verticesCCW()[j][1];
+            x4 = env_.obstacles[i].verticesCCW()[j+1][0];
+            y4 = env_.obstacles[i].verticesCCW()[j+1][1];
             if (j == num_vertices-1) {
-                x4 = environment_.obstacles[i].verticesCCW()[0][0];
-                y4 = environment_.obstacles[i].verticesCCW()[0][1];
+                x4 = env_.obstacles[i].verticesCCW()[0][0];
+                y4 = env_.obstacles[i].verticesCCW()[0][1];
             }
             slope1 = (y2-y1)/(x2-x1);
             slope2 = (y4-y3)/(x4-x3);

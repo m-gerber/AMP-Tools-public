@@ -71,9 +71,10 @@ amp::ManipulatorState amp::MyLinkManipulator::getConfigurationFromIK(const Eigen
 
     double theta1, theta2, theta3;
 
-    amp::ManipulatorState angles;
-    angles << -1;
     std::vector<Eigen::Vector2d> valid_points;
+    amp::ManipulatorState angles(1);
+    amp::ManipulatorState angles2(2);
+    amp::ManipulatorState angles3(3);
     double x_j1, y_j1, x_j2, y_j2;
     double mag_A, mag_B, dot_AB;
     double angle_A, angle_B;
@@ -83,12 +84,14 @@ amp::ManipulatorState amp::MyLinkManipulator::getConfigurationFromIK(const Eigen
             if (dist == a0) {
                 angles << atan2(y_e,x_e);
             }
+            return angles;
             break;
         case 2:
             a1 = getLinkLengths()[1];
             theta2 = atan2(t2_sin(x_e,y_e,a0,a1),t2_cos(x_e,y_e,a0,a1));
             theta1 = atan2(t1_sin(x_e,y_e,a0,a1,theta2),t1_cos(x_e,y_e,a0,a1,theta2));
-            angles << theta1, theta2;
+            angles2 << theta1, theta2;
+            return angles2;
             break;
         case 3:
             a1 = getLinkLengths()[1];
@@ -128,7 +131,8 @@ amp::ManipulatorState amp::MyLinkManipulator::getConfigurationFromIK(const Eigen
             if (angle_B < 0) angle_B += 2*M_PI;
             if (angle_B < angle_A) theta3 = -theta3;
 
-            angles << theta1, theta2, theta3;
+            angles3 << theta1, theta2, theta3;
+            return angles3;
             break;
         default:
             std::cout << "Too many links." << std::endl;

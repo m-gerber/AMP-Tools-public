@@ -8,9 +8,11 @@
 /// @param environment Workspace and/or C-space (point agent)
 /// @return Unique pointer to a GridCSpace2D object (see HW4)
 std::unique_ptr<amp::GridCSpace2D> amp::MyPointWFAlgo::constructDiscretizedWorkspace(const amp::Environment2D& env) {
+    DEBUG("in construct ws");
     std::unique_ptr<amp::MyGridCSpace> ptr(new MyGridCSpace(100, 100, env.x_min, env.x_max, env.y_min, env.y_max));
+    DEBUG("af allocate");
     ptr->buildPointCSpace(env);
-
+    DEBUG("af c ws");
     return ptr;
 }
 
@@ -22,9 +24,9 @@ int amp::MyPointWFAlgo::isValid(std::pair<int, int> inds, std::vector<std::vecto
 }
 
 amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, const Eigen::Vector2d& q_goal, const amp::GridCSpace2D& grid_cspace) {
-
-    std::pair<int, int> x0_bounds = grid_cspace.x0Bounds();
-    std::pair<int, int> x1_bounds = grid_cspace.x1Bounds();
+    DEBUG("in plan cspace");
+    std::pair<double, double> x0_bounds = grid_cspace.x0Bounds();
+    std::pair<double, double> x1_bounds = grid_cspace.x1Bounds();
 
     std::pair<int, int> num_cells = grid_cspace.size();
     std::pair<int, int> goal_cell = grid_cspace.getCellFromPoint(q_goal[0], q_goal[1]);
@@ -39,11 +41,11 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
     double cell_size_x1 = (x1_bounds.second-x1_bounds.first) / static_cast<double>(num_cells.second);
 
     std::pair<int, int> curr_pos = goal_cell;
-
+    DEBUG("b4");
     std::vector<std::vector<amp::cell>> graph;
     graph.resize(num_cells.first);
     for (int i = 0; i < num_cells.first; i++) graph[i].resize(num_cells.second);
-
+    DEBUG("af");
     graph[curr_pos.first][curr_pos.second].visited = 1;
     graph[curr_pos.first][curr_pos.second].val = 2;
     graph[curr_pos.first][curr_pos.second].parent = {-1,-1};
@@ -57,6 +59,8 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
 
     int iter1 = 0;
 
+    int wrap_ind;
+
     while((curr_pos != init_cell) && !q.empty()) {
         iter1++;
         curr_pos = q.front();
@@ -65,6 +69,7 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
         for (int i = 0; i < 4; i++) {
             new_pos.first = curr_pos.first + dx[i];
             new_pos.second = curr_pos.second + dy[i];
+            //LOG("new pos: " << new_pos.first << ", " << new_pos.second << "; is valid: " << isValid({new_pos.first, new_pos.second}, graph, grid_cspace));
             if (isValid({new_pos.first, new_pos.second}, graph, grid_cspace) == 1) {
                 q.push({new_pos.first, new_pos.second});
                 graph[new_pos.first][new_pos.second].visited = true;
@@ -75,6 +80,7 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
                 graph[new_pos.first][new_pos.second].visited = true;
                 graph[new_pos.first][new_pos.second].val = 1;
             }
+            
         }
     }
 

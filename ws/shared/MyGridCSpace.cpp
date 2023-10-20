@@ -19,11 +19,6 @@ void amp::MyGridCSpace::buildPointCSpace(amp::Environment2D env) {
             x1 = env.y_min + dtheta2*j;
             isIn = inPolygon(x0,x1);
             operator()(i,j) = inPolygon(x0,x1);
-            if (isIn) {
-                for (int k = 0; k < 4; k++) {
-                    operator()(i+dx[k],j+dy[k]) = 1;
-                }
-            }
         }
     }
 }

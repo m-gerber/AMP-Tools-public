@@ -9,6 +9,13 @@
 
 namespace amp {
 
+struct cell2 {
+    bool visited = 0;
+    int val = 0;
+    std::pair<int, int> parent;
+    std::pair<int, int> child;
+};
+
 class MyManipWFAlgo : public amp::ManipulatorWaveFrontAlgorithm {
     public:
         // Default ctor
@@ -19,10 +26,9 @@ class MyManipWFAlgo : public amp::ManipulatorWaveFrontAlgorithm {
         MyManipWFAlgo(const std::string& beep) 
             : amp::ManipulatorWaveFrontAlgorithm(std::make_shared<MyGridCSpace2DConstructor>()) {LOG("constructing... " << beep);}
 
-        // This is just to get grade to work, you DO NOT need to override this method
-        virtual amp::ManipulatorTrajectory2Link plan(const LinkManipulator2D& link_manipulator_agent, const amp::Problem2D& problem) override {
-            return amp::ManipulatorTrajectory2Link();
-        }
+
+
+        int isValid(std::pair<int, int> inds, std::vector<std::vector<cell2>> graph, const amp::GridCSpace2D& grid_cspace);
         
         // You need to implement here
         virtual amp::Path2D planInCSpace(const Eigen::Vector2d& q_init, const Eigen::Vector2d& q_goal, const amp::GridCSpace2D& grid_cspace) override;

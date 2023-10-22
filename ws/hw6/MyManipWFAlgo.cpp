@@ -81,9 +81,15 @@ amp::Path2D amp::MyManipWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
 
     path.waypoints.push_back(Eigen::Vector2d(q_init[0], q_init[1]));
 
+    double x0_pos, x1_pos;
+
     while (curr_pos != goal_cell || iter2 == iter1) {
         iter2++;
-        path.waypoints.push_back(Eigen::Vector2d(curr_pos.first*cell_size_x0 + x0_bounds.first,curr_pos.second*cell_size_x1 + x1_bounds.first));
+        x0_pos = curr_pos.first*cell_size_x0 + x0_bounds.first;
+        x1_pos = curr_pos.second*cell_size_x1 + x1_bounds.first;
+        if (x0_pos > M_PI) x0_pos = M_PI;
+        if (x1_pos > M_PI) x1_pos = M_PI;
+        path.waypoints.push_back(Eigen::Vector2d(x0_pos, x1_pos));
         curr_pos = graph[curr_pos.first][curr_pos.second].parent;
     }
     path.waypoints.push_back(Eigen::Vector2d(q_goal[0], q_goal[1]));

@@ -82,7 +82,9 @@ amp::ManipulatorState amp::MyLinkManipulator::getConfigurationFromIK(const Eigen
     switch(num_links) {
         case 1:
             if (dist == a0) {
-                angles << atan2(y_e,x_e);
+                theta1 = atan2(y_e,x_e);
+                // if (theta1 < 0) theta1 += 2*M_PI;
+                angles << theta1;
             }
             return angles;
             break;
@@ -90,6 +92,8 @@ amp::ManipulatorState amp::MyLinkManipulator::getConfigurationFromIK(const Eigen
             a1 = getLinkLengths()[1];
             theta2 = atan2(t2_sin(x_e,y_e,a0,a1),t2_cos(x_e,y_e,a0,a1));
             theta1 = atan2(t1_sin(x_e,y_e,a0,a1,theta2),t1_cos(x_e,y_e,a0,a1,theta2));
+            // if (theta2 < 0) theta2 += 2*M_PI;
+            // if (theta1 < 0) theta1 += 2*M_PI;
             angles2 << theta1, theta2;
             return angles2;
             break;

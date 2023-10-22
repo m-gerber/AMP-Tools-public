@@ -3,9 +3,10 @@
 void amp::MyGridCSpace::buildPointCSpace(amp::Environment2D env) {
     env_ = env;
 
-    int grid_discretization = size().first;
-    double dtheta1 = (env.x_max-env.x_min) / grid_discretization;
-    double dtheta2 = (env.y_max-env.y_min) / grid_discretization;
+    int grid_discretization_x0 = size().first;
+    int grid_discretization_x1 = size().second;
+    double dtheta1 = (env.x_max-env.x_min) / grid_discretization_x0;
+    double dtheta2 = (env.y_max-env.y_min) / grid_discretization_x1;
 
     double x0, x1;
     bool isIn;
@@ -13,9 +14,9 @@ void amp::MyGridCSpace::buildPointCSpace(amp::Environment2D env) {
     int dx[] = { -1, 0, 1,  0 };
     int dy[] = {  0, 1, 0, -1 };
 
-    for (int i = 0; i < grid_discretization; i++) {
+    for (int i = 0; i < grid_discretization_x0; i++) {
         x0 = env.x_min + dtheta1*i;
-        for (int j = 0; j < grid_discretization; j++) {
+        for (int j = 0; j < grid_discretization_x1; j++) {
             x1 = env.y_min + dtheta2*j;
             isIn = inPolygon(x0,x1);
             operator()(i,j) = inPolygon(x0,x1);
@@ -63,7 +64,7 @@ bool amp::MyGridCSpace::inPolygon(double x_pos, double y_pos) const {
 void amp::MyGridCSpace::buildLinkCSpace(amp::MyLinkManipulator links, amp::Environment2D env) {
     env_ = env;
     links_ = links; 
-
+    
     int grid_discretization = size().first;
     double dtheta = 2*M_PI / grid_discretization;
 

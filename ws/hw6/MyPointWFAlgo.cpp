@@ -8,7 +8,7 @@
 /// @param environment Workspace and/or C-space (point agent)
 /// @return Unique pointer to a GridCSpace2D object (see HW4)
 std::unique_ptr<amp::GridCSpace2D> amp::MyPointWFAlgo::constructDiscretizedWorkspace(const amp::Environment2D& env) {
-    std::unique_ptr<amp::MyGridCSpace> ptr(new MyGridCSpace(100, 100, env.x_min, env.x_max, env.y_min, env.y_max));
+    std::unique_ptr<amp::MyGridCSpace> ptr(new MyGridCSpace(round((env.x_max-env.x_min)*4), round((env.y_max-env.y_min)*4), env.x_min, env.x_max, env.y_min, env.y_max));
     ptr->buildPointCSpace(env);
     return ptr;
 }

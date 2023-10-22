@@ -13,18 +13,18 @@ using namespace amp;
 int main(int argc, char** argv) {
     amp::RNG::seed(amp::RNG::randiUnbounded());
 
-    // MyPointWFAlgo pointAlgo;
-    // amp::Problem2D pointProb1 = HW2::getWorkspace1();
-    // amp::Path2D pointPath1 = pointAlgo.plan(pointProb1);
-    // amp::Problem2D pointProb2 = HW2::getWorkspace2();
-    // amp::Path2D pointPath2 = pointAlgo.plan(pointProb2);
-    // LOG("Path length 1: " << pointPath1.length());
-    // LOG("Path length 2: " << pointPath2.length());
-    // Visualizer::makeFigure(pointProb1,pointPath1);
-    // Visualizer::makeFigure(pointProb2,pointPath2);
-    
-    // Visualizer::showFigures();
-    // PAUSE;
+    MyPointWFAlgo pointAlgo;
+    amp::Problem2D pointProb1 = HW2::getWorkspace1();
+    amp::Path2D pointPath1 = pointAlgo.plan(pointProb1);
+    amp::Problem2D pointProb2 = HW2::getWorkspace2();
+    amp::Path2D pointPath2 = pointAlgo.plan(pointProb2);
+    LOG("Path length 1: " << pointPath1.length());
+    LOG("Path length 2: " << pointPath2.length());
+    Visualizer::makeFigure(pointProb1,pointPath1);
+    Visualizer::makeFigure(pointProb2,pointPath2);
+
+    Visualizer::showFigures();
+    PAUSE;
 
     MyManipWFAlgo manipAlgo;
     MyLinkManipulator link_manipulator_agent;
@@ -57,36 +57,6 @@ int main(int argc, char** argv) {
 
     Visualizer::showFigures();
     PAUSE;
-
-
-    //for (uint32_t seed = 1; seed < 20; ++seed) {
-        
-        
-        // // MyLinkManipulator link_manipulator_agent;
-        // // Random2DManipulatorEnvironmentSpecification spec;
-        // // MyGridCSpace2DConstructor m_c_space_constructor;
-        
-        // // amp::Problem2D prob = EnvironmentTools::generateRandomManipulatorProblem(spec, link_manipulator_agent, seed);
-        
-        // amp::ManipulatorState init_state = link_manipulator_agent.getConfigurationFromIK(prob.q_init);
-        // amp::ManipulatorState goal_state = link_manipulator_agent.getConfigurationFromIK(prob.q_goal);
-        // std::unique_ptr<amp::GridCSpace2D> grid_cspace = m_c_space_constructor.construct(link_manipulator_agent, prob);
-        //     // Now that we have everything, we can call method to plan in C-space using the WaveFront algorithm
-        //     // Note, we can use the `convert` overloads to easily go between ManipulatorState and ManipulatorState2Link
-        // amp::Path2D pathC = manipAlgo.planInCSpace(convert(init_state), convert(goal_state), *grid_cspace);
-        // amp::Path2D pathWS = manipAlgo.plan(link_manipulator_agent, prob);
-        // amp::Path2D init_goal;
-        // init_goal.waypoints.push_back(init_state); 
-        // init_goal.waypoints.push_back(goal_state); 
-        // bool success = HW6::checkLinkManipulatorPlan(pathWS, link_manipulator_agent, prob);
-        // // if(!success) {
-        //     // LOG("Seed: " << seed);
-        //     Visualizer::makeFigure(*grid_cspace, pathC);
-        //     Visualizer::makeFigure(*grid_cspace, init_goal);
-        //     Visualizer::makeFigure(prob, link_manipulator_agent, pathWS);
-        //     Visualizer::showFigures();
-        // // }
-    //}
     
     HW6::grade<MyPointWFAlgo, MyManipWFAlgo, MyAStarAlgo>("mage7128@colorado.edu", argc, argv, std::make_tuple(), std::make_tuple("hey there"), std::make_tuple());
     return 0;

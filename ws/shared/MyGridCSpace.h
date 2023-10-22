@@ -23,15 +23,23 @@ class MyGridCSpace : public GridCSpace2D {
         bool inPolygon(double x_pos, double y_pos) const;
         void buildLinkCSpace(amp::MyLinkManipulator links, amp::Environment2D env);
         bool collisionChecker(double angle0, double angle1) const;
+
+        int my_ceil(double val) const {
+            if (val <= 0) {
+                return floor(val);
+            } 
+            return ceil(val);
+        }
+
         virtual std::pair<std::size_t, std::size_t> getCellFromPoint(double x0, double x1) const {
             double dx0 = x0_max_ - x0_min_;
             double dx1 = x1_max_ - x1_min_;
 
-            int most_neg0 = floor(x0_min_ / dx0 * x0_cells_);
-            int most_neg1 = floor(x1_min_ / dx1 * x1_cells_);
+            int most_neg0 = my_ceil(x0_min_ / dx0 * x0_cells_);
+            int most_neg1 = my_ceil(x1_min_ / dx1 * x1_cells_);
 
-            int ind_x0 = floor(x0 / dx0 * x0_cells_) - most_neg0;
-            int ind_x1 = floor(x1 / dx1 * x1_cells_) - most_neg1;
+            int ind_x0 = my_ceil(x0 / dx0 * x0_cells_) - most_neg0;
+            int ind_x1 = my_ceil(x1 / dx1 * x1_cells_) - most_neg1;
 
             return {ind_x0, ind_x1};
         }

@@ -70,9 +70,9 @@ void amp::MyGridCSpace::buildLinkCSpace(amp::MyLinkManipulator links, amp::Envir
     double x0, x1;
 
     for (int i = 0; i < grid_discretization; i++) {
-        x0 = dtheta*i;
+        x0 = -M_PI + dtheta*i;
         for (int j = 0; j < grid_discretization; j++) {
-            x1 = dtheta*j;
+            x1 = -M_PI + dtheta*j;
             operator()(i,j) = collisionChecker(x0,x1);
         }
     }
@@ -80,7 +80,7 @@ void amp::MyGridCSpace::buildLinkCSpace(amp::MyLinkManipulator links, amp::Envir
 
 bool amp::MyGridCSpace::collisionChecker(double angle0, double angle1) const {
     amp::ManipulatorState state(2);
-    state <<  angle0, angle1;
+    state << angle0, angle1;
 
     Eigen::Vector2d j1 = links_.getJointLocation(state,1);
     Eigen::Vector2d j2 = links_.getJointLocation(state,2);

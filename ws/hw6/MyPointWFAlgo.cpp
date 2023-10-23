@@ -96,9 +96,6 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
         }
     }
 
-    LOG("queue is empty: " << q.empty());
-    PAUSE;
-
     amp::Path2D path;
     int iter2 = 0;
 

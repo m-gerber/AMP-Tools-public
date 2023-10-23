@@ -5,8 +5,13 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
 
     amp::AStar::GraphSearchResult mySearchResult;
 
+    // problem.graph->print();
+
     amp::Node init_node = problem.init_node;
     amp::Node goal_node = problem.goal_node;
+
+    // std::cout << "init_node: " << init_node << std::endl;
+    // std::cout << "goal_node: " << goal_node << std::endl;
 
     // Create vector for open list
     std::vector<amp::Node_Info> open_list;
@@ -31,6 +36,8 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
         parent_node = open_list.back().node;
         closed_list[parent_node] = open_list.back();
 
+        // LOG("parent_node: " << open_list.back().node << " " << open_list.back().parent << " " << open_list.back().g << " " << open_list.back().h << " " << open_list.back().f);
+
         if (goal_found) {
             // DEBUG("goal_dist orig: " << goal_dist); 
             // DEBUG("open_list.back().h: " << open_list.back().h); 
@@ -51,13 +58,17 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
             for (int j = 0; j < open_list.size(); j++) {
                 updated = false;
                 
-                double n1 = open_list[j].node;
-                double n2 = update_info.node;
+                double n_open = open_list[j].node;
+                double n_curr = update_info.node;
                 
-                if (std::abs(n1 - n2) < 0.01) {
+                if (std::abs(n_open - n_curr) < 0.01) {
                     if (open_list[j].f > update_info.f) {
                         open_list[j] = update_info;
                     }
+                    updated = true;
+                    break;
+                }
+                if (closed_list[update_info.node].node != -1) {
                     updated = true;
                     break;
                 }
@@ -71,15 +82,20 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
                 goal_dist = update_info.f;
                 // DEBUG("goal_dist fresh: " << goal_dist); 
             }
-            // LOG("update_info: " << update_info.node << " " << update_info.parent << " " << update_info.g << " " << update_info.h << " " << update_info.f);
+            // LOG("child" << i << ": " << update_info.node << " " << update_info.parent << " " << update_info.g << " " << update_info.h << " " << update_info.f);
         }
-        // for (int i = 0; i < open_list.size(); i++) {
-        //     LOG("queue " << i << ": " << open_list[i].node << " " << open_list[i].parent << " " << open_list[i].g << " " << open_list[i].h << " " << open_list[i].f);
-        // }
+        for (int i = 0; i < open_list.size(); i++) {
+            // LOG("queue " << i << ": " << open_list[i].node << " " << open_list[i].parent << " " << open_list[i].g << " " << open_list[i].h << " " << open_list[i].f);
+        }
+        // PAUSE;
     }
 
     // for (int i = 0; i < open_list.size(); i++) {
     //     LOG("queue " << i << ": " << open_list[i].node << " " << open_list[i].parent << " " << open_list[i].g << " " << open_list[i].h << " " << open_list[i].f);
+    // }
+
+    // for (int i = 0; i < closed_list.size(); i++) {
+    //     LOG("closed " << i << ": " << closed_list[i].node << " " << closed_list[i].parent << " " << closed_list[i].g << " " << closed_list[i].h << " " << closed_list[i].f);
     // }
 
     mySearchResult.success = goal_found;
@@ -110,13 +126,14 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
         }
         mySearchResult.node_path = myPath;
     } 
-    std::cout << "algo path: " << std::endl;
-    for (const amp::Node& node : mySearchResult.node_path) {
-        std::cout << node << " ";
-    }
+    // std::cout << "algo path: " << std::endl;
+    // for (const amp::Node& node : mySearchResult.node_path) {
+    //     std::cout << node << " ";
+    // }
     // std::cout << std::endl;
 
-    std::cout << "Finished!" << std::endl;
+    // std::cout << "Finished!" << std::endl;
+    // PAUSE;
 
     return mySearchResult;
 }

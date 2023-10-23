@@ -11,9 +11,6 @@ void amp::MyGridCSpace::buildPointCSpace(amp::Environment2D env) {
     double x0, x1;
     bool isIn;
 
-    int dx[] = { -1, 0, 1,  0 };
-    int dy[] = {  0, 1, 0, -1 };
-
     for (int i = 0; i < grid_discretization_x0; i++) {
         x0 = env.x_min + dtheta1*i;
         for (int j = 0; j < grid_discretization_x1; j++) {

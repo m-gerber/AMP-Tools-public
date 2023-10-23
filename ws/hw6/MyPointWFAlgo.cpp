@@ -44,11 +44,12 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
 
     int dx[] = { -1, 0, 1,  0 };
     int dy[] = {  0, 1, 0, -1 };
-    std::pair<int, int> new_pos;
+    int dxr[] = { -1, 0, 1,  0, 1, -1, -1,  1 };
+    int dyr[] = {  0, 1, 0, -1, 1,  1, -1, -1 };
+    std::pair<int, int> new_pos, reach_pos;
+    bool new_valid, reach_valid;
 
     int iter1 = 0;
-
-    int wrap_ind;
 
     while((curr_pos != init_cell) && !q.empty()) {
         iter1++;
@@ -56,21 +57,47 @@ amp::Path2D amp::MyPointWFAlgo::planInCSpace(const Eigen::Vector2d& q_init, cons
         q.pop();
 
         for (int i = 0; i < 4; i++) {
+            new_valid = true;
             new_pos.first = curr_pos.first + dx[i];
             new_pos.second = curr_pos.second + dy[i];
-            if (isValid({new_pos.first, new_pos.second}, graph, grid_cspace) == 1) {
-                q.push({new_pos.first, new_pos.second});
-                graph[new_pos.first][new_pos.second].visited = true;
-                graph[new_pos.first][new_pos.second].val = graph[curr_pos.first][curr_pos.second].val + 1;
-                graph[new_pos.first][new_pos.second].parent = curr_pos;
-                graph[curr_pos.first][curr_pos.second].child = new_pos;
-            } else if (isValid({new_pos.first, new_pos.second}, graph, grid_cspace) == -1) {
-                graph[new_pos.first][new_pos.second].visited = true;
-                graph[new_pos.first][new_pos.second].val = 1;
+            if (new_pos.first  >= num_cells.first)  new_valid = false;
+            if (new_pos.second >= num_cells.second) new_valid = false;
+            if (new_pos.first  < 0) new_valid = false;
+            if (new_pos.second < 0) new_valid = false;
+            if (new_valid) {
+                if (graph[new_pos.first][new_pos.second].val == 0) {
+                    for (int j = 0; j < 8; j++) {
+                        reach_valid = true;
+                        reach_pos.first = new_pos.first + dxr[j];
+                        reach_pos.second = new_pos.second + dyr[j];
+                        if (reach_pos.first  >= num_cells.first)  reach_valid = false;
+                        if (reach_pos.second >= num_cells.second) reach_valid = false;
+                        if (reach_pos.first  < 0) reach_valid = false;
+                        if (reach_pos.second < 0) reach_valid = false;
+                        if (reach_valid) {
+                            if (grid_cspace(reach_pos.first,reach_pos.second)) {
+                                graph[new_pos.first][new_pos.second].visited = true;
+                                graph[new_pos.first][new_pos.second].val = 1;
+                                break;
+                            }
+                        }
+                    }
+                    if (reach_valid) {
+                        if (!grid_cspace(reach_pos.first,reach_pos.second)) {
+                            q.push({new_pos.first, new_pos.second});
+                            graph[new_pos.first][new_pos.second].visited = true;
+                            graph[new_pos.first][new_pos.second].val = graph[curr_pos.first][curr_pos.second].val + 1;
+                            graph[new_pos.first][new_pos.second].parent = curr_pos;
+                            graph[curr_pos.first][curr_pos.second].child = new_pos;
+                        }
+                    }
+                }
             }
-            
         }
     }
+
+    LOG("queue is empty: " << q.empty());
+    PAUSE;
 
     amp::Path2D path;
     int iter2 = 0;

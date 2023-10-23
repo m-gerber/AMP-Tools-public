@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     // Visualizer::showFigures();
     // PAUSE;
 
-    amp::MyAStarAlgo aStarAlgo;
+    // amp::MyAStarAlgo aStarAlgo;
 
     // amp::ShortestPathProblem pathEx3 = HW6::getEx3SPP();
     // amp::LookupSearchHeuristic hueristicEx3 =  HW6::getEx3Heuristic();
@@ -69,37 +69,8 @@ int main(int argc, char** argv) {
     //     std::cout << node << " ";
     // }
     // std::cout << std::endl;
-    // PAUSE;
 
     // amp::HW6::checkGraphSearchResult(result, pathEx3, hueristicEx3, true);
-    // PAUSE;
-
-    // uint32_t n_nodes = 20;
-    // double min_edge_weight = 0.0;
-    // double max_edge_weight = 10.0;
-    // uint32_t max_outgoing_edges_per_node = 5;
-    // double connectedness = 0.5;
-
-    // int iter = 0;
-
-    // for (int i = 0; i < 20; i++) {
-    //     std::cout << "iter: " << ++iter <<std::endl;
-    //     uint32_t seed = i;
-    //     amp::ShortestPathProblem randPath = amp::GraphTools::generateRandomSPP(n_nodes, min_edge_weight, max_edge_weight, max_outgoing_edges_per_node, connectedness, seed);
-    //     amp::AStar::GraphSearchResult result1 = aStarAlgo.search(randPath, amp::SearchHeuristic());
-    //     bool success = amp::HW6::checkGraphSearchResult(result1, randPath, amp::SearchHeuristic(), true);
-    //     PAUSE;
-    // }
-    // uint32_t seed = 0u;
-    // amp::ShortestPathProblem randPath = amp::GraphTools::generateRandomSPP(n_nodes, min_edge_weight, max_edge_weight, max_outgoing_edges_per_node, connectedness, seed);
-    // amp::AStar::GraphSearchResult result1 = aStarAlgo.search(randPath, amp::SearchHeuristic());
-    // amp::HW6::checkGraphSearchResult(result1, randPath, amp::SearchHeuristic(), true);
-    // // HW6::generateAndCheck(aStarAlgo, result1, randPath, true, seed);
-    // // std::cout << "path: " << std::endl;
-    // // for (const amp::Node& node : result.node_path) {
-    // //     std::cout << node << " ";
-    // // }
-    // // std::cout << std::endl;
     // PAUSE;
     
     HW6::grade<MyPointWFAlgo, MyManipWFAlgo, MyAStarAlgo>("mage7128@colorado.edu", argc, argv, std::make_tuple(), std::make_tuple(), std::make_tuple());

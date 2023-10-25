@@ -71,7 +71,24 @@ int main(int argc, char** argv) {
     // std::cout << std::endl;
 
     // amp::HW6::checkGraphSearchResult(result, pathEx3, hueristicEx3, true);
-    // PAUSE;
+
+    // amp::MyAStarAlgo aStarAlgo;
+    // uint32_t n_nodes = 5000;
+    // double min_edge_weight = 0.0;
+    // double max_edge_weight = 10.0;
+    // uint32_t max_outgoing_edges_per_node = 20;
+    // double connectedness = 0.5;
+
+    // amp::ShortestPathProblem randPath;
+    // amp::AStar::GraphSearchResult randResult;
+    
+    // for (int i = 0; i < 20; i++) {
+    //     uint32_t seed = i;
+    //     randPath = amp::GraphTools::generateRandomSPP(n_nodes, min_edge_weight, max_edge_weight, max_outgoing_edges_per_node, connectedness, seed);
+    //     randResult = aStarAlgo.search(randPath, amp::SearchHeuristic());
+    //     amp::HW6::checkGraphSearchResult(randResult, randPath, amp::SearchHeuristic(), true);
+    //     PAUSE;
+    // }
     
     HW6::grade<MyPointWFAlgo, MyManipWFAlgo, MyAStarAlgo>("mage7128@colorado.edu", argc, argv, std::make_tuple(), std::make_tuple(), std::make_tuple());
     return 0;

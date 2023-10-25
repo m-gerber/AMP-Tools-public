@@ -25,6 +25,12 @@ struct Node_Info {
         , f(f) {}
 };
 
+struct Comparef {
+    bool operator()(amp::Node_Info& n1, amp::Node_Info& n2) {
+        return n1.f > n2.f;
+    }
+}; 
+
 class MyAStarAlgo : public amp::AStar {
     public:
         virtual GraphSearchResult search(const amp::ShortestPathProblem& problem, const amp::SearchHeuristic& heuristic) override;

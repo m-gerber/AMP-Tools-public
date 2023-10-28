@@ -13,7 +13,7 @@ namespace amp {
 class PRM : public PointMotionPlanner2D {
     public:
         /// @brief Solve a motion planning problem. Create a derived class and override this method
-        //virtual amp::Path2D plan(const amp::Problem2D& problem) = 0;
+        virtual amp::Path2D plan(const amp::Problem2D& problem) = 0;
 
         virtual ~PRM() {}
 };

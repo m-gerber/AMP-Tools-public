@@ -33,10 +33,14 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
     std::vector<Eigen::Vector2d> sampled_points;
     amp::LookupSearchHeuristic heuristic;
 
+    //added
+    amp::ShortestPathProblem pathProblem;
+    pathProblem.graph = std::make_shared<Graph<double>>();
+
     sampled_points.push_back(problem.q_init);
     sampled_points.push_back(problem.q_goal);
 
-    amp::Graph<double> graph;
+    // amp::Graph<double> graph;
 
     double x_min = problem.x_min;
     double x_max = problem.x_max;
@@ -70,20 +74,29 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
             if (dist < r_) {
                 // if connection isnt line intersecting
                 if (!lineIntersect(x1,y1,x2,y2,problem)) {
-                    graph.connect(i, j, dist);
-                    graph.connect(j, i, dist);
+                    // graph.connect(i, j, dist);
+                    // graph.connect(j, i, dist);
+                    
+                    pathProblem.graph->connect(i, j, dist);
+                    pathProblem.graph->connect(j, i, dist);
                 }
             }
         }
     }
 
     amp::MyAStarAlgo aStar;
-    amp::ShortestPathProblem pathProblem;
-    pathProblem.graph = std::make_shared<Graph<double>>(graph);
+    // amp::ShortestPathProblem pathProblem;
+    // pathProblem.graph = std::make_shared<Graph<double>>(graph);
 	pathProblem.init_node = 0;
 	pathProblem.goal_node = 1;
     amp::AStar::GraphSearchResult searchResult = aStar.search(pathProblem, heuristic);
-    pathProblem.graph.reset();
+    
+    // pathProblem.graph->clear();
+    // pathProblem.graph = nullptr;
+    // graph.clear();
+
+    // amp::ShortestPathProblem pathEx3 = HW6::getEx3SPP();
+    // amp::AStar::GraphSearchResult searchResult = aStar.search(pathEx3, heuristic);
 
     amp::Path2D path;
 

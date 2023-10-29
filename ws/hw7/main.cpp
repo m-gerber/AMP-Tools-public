@@ -15,7 +15,5 @@ int main(int argc, char** argv) {
 
     bool plotE3 = 0;
 
-    
-
     return 0;
 }

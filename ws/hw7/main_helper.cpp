@@ -67,7 +67,7 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
         // static void makeBoxPlot(const std::list<std::vector<double>>& data_sets, const std::vector<std::string>& labels, 
         //                         const std::string& title = std::string(), const std::string& xlabel = std::string(), const std::string& ylabel = std::string());
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 8; i++) {
 
             num_successes = 0;
             path_length = 0;
@@ -78,6 +78,7 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
 
             for (int j = 0; j < num_trials; j++) {
                 amp::Path2D path_testerq1a = q1_tester.plan(q1a);
+                if (smoothing) path_testerq1a = pathSmoothing(path_testerq1a, q1a);
                 if (path_testerq1a.waypoints.size() > 0) {
                     num_successes++;
                     path_length += path_testerq1a.length();
@@ -87,7 +88,7 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
-            LOG("For Exercise 2.(a) of Homework 5 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials:");
+            LOG("For Exercise 2.(a) of Homework 5 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
             LOG("");
             LOG(" ----- SUCCESSES ------");
             LOG("num: " << num_successes << " (" << static_cast<double>(num_successes)/static_cast<double>(num_trials)*100.0 << "%)");
@@ -115,6 +116,7 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
 
             for (int j = 0; j < num_trials; j++) {
                 amp::Path2D path_testerq1b1 = q1_tester.plan(q1b1);
+                if (smoothing) path_testerq1b1 = pathSmoothing(path_testerq1b1, q1b1);
                 if (path_testerq1b1.waypoints.size() > 0) {
                     num_successes++;
                     path_length += path_testerq1b1.length();
@@ -124,7 +126,7 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
-            LOG("For Exercise 2.(a) of Homework 2 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials:");
+            LOG("For Exercise 2.(b) of Homework 5 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
             LOG("");
             LOG(" ----- SUCCESSES ------");
             LOG("num: " << num_successes << " (" << static_cast<double>(num_successes)/static_cast<double>(num_trials)*100.0 << "%)");
@@ -152,6 +154,7 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
 
             for (int j = 0; j < num_trials; j++) {
                 amp::Path2D path_testerq1b2 = q1_tester.plan(q1b2);
+                if (smoothing) path_testerq1b2 = pathSmoothing(path_testerq1b2, q1b2);
                 if (path_testerq1b2.waypoints.size() > 0) {
                     num_successes++;
                     path_length += path_testerq1b2.length();
@@ -161,7 +164,7 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
-            LOG("For Exercise 2.(b) of Homework 2 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials:");
+            LOG("For Exercise 2.(b) of Homework 2 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
             LOG("");
             LOG(" ----- SUCCESSES ------");
             LOG("num: " << num_successes << " (" << static_cast<double>(num_successes)/static_cast<double>(num_trials)*100.0 << "%)");
@@ -180,5 +183,4 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
 
     }
 
-    
 }

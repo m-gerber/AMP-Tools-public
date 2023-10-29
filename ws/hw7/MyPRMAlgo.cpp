@@ -83,6 +83,7 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
 	pathProblem.init_node = 0;
 	pathProblem.goal_node = 1;
     amp::AStar::GraphSearchResult searchResult = aStar.search(pathProblem, heuristic);
+    pathProblem.graph.reset();
 
     amp::Path2D path;
 

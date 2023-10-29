@@ -16,13 +16,17 @@ class GenericPRM {
 
 class MyPRM2D : public amp::PRM2D, public GenericPRM {
     public:
+        MyPRM2D() {}
+        MyPRM2D(int n, double r) : n_(n), r_(r) {}
         virtual amp::Path2D plan(const amp::Problem2D& problem) override;
         Path2D plan_2D(const amp::Problem2D& problem);
         bool inPolygon(double x_pos, double y_pos) const;
-        bool lineIntersect(double x1, double y1, double x2, double y2);
+        bool lineIntersect(double x1, double y1, double x2, double y2, amp::Problem2D);
 
     private:
         amp::Problem2D prob_;
+        int n_ = 1000;
+        double r_ = 2;
 };
 
 }

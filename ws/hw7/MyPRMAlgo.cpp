@@ -26,16 +26,6 @@ amp::Path2D amp::MyPRM2D::plan(const amp::Problem2D& problem) {
     return path_nd;
 }
 
-// struct LookupSearchHeuristic : public SearchHeuristic {
-// 	/// @brief Get the heuristic value stored in `heuristic_values`. 
-// 	/// @param node Node to get the heuristic value h(node) for. 
-// 	/// @return Heuristic value
-// 	virtual double operator()(amp::Node node) const override {return heuristic_values.at(node);}
-
-//     /// @brief Store the heursitic values for each node in a map
-//     std::map<amp::Node, double> heuristic_values; 
-// };
-
 amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
     prob_ = problem;
 
@@ -48,15 +38,12 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
 
     amp::Graph<double> graph;
 
-    int n = 200;
-    double r = 1;
-
     double x_min = problem.x_min;
     double x_max = problem.x_max;
     double y_min = problem.y_min;
     double y_max = problem.y_max;
 
-    for (int i = 0; i < n+2; i++) {
+    for (int i = 0; i < n_+2; i++) {
         x1 = amp::RNG::randd(x_min,x_max);
         y1 = amp::RNG::randd(y_min,y_max);
         if(!inPolygon(x1, y1)) sampled_points.push_back(Eigen::Vector2d({x1,y1}));
@@ -71,6 +58,7 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
         dist = sqrt((dx*dx)+(dy*dy));
 
         heuristic.heuristic_values.insert(std::pair<Node, double>(i, dist));
+
         for (int j = i+1; j < sampled_points.size(); j++) {
             x2 = sampled_points[j][0];
             y2 = sampled_points[j][1];
@@ -79,9 +67,9 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
             dy = y2 - y1;
             dist = sqrt((dx*dx)+(dy*dy));
             // if distance is less than threshold
-            if (dist < r) {
+            if (dist < r_) {
                 // if connection isnt line intersecting
-                if (!lineIntersect(x1,y1,x2,y2)) {
+                if (!lineIntersect(x1,y1,x2,y2,problem)) {
                     graph.connect(i, j, dist);
                     graph.connect(j, i, dist);
                 }
@@ -142,26 +130,26 @@ bool amp::MyPRM2D::inPolygon(double x_pos, double y_pos) const {
     return inside;
 }
 
-bool amp::MyPRM2D::lineIntersect(double x1, double y1, double x2, double y2) {
+bool amp::MyPRM2D::lineIntersect(double x1, double y1, double x2, double y2, amp::Problem2D prob) {
     double t, u;
     double x3, y3, x4, y4;
 
     double slope1, slope2;
     double x1_y3, x1_y4, x2_y3, x2_y4;
 
-    int num_obstacles = prob_.obstacles.size();
+    int num_obstacles = prob.obstacles.size();
     int num_vertices;
 
     for (int i = 0; i < num_obstacles; i++) {
-        num_vertices = prob_.obstacles[i].verticesCCW().size();
+        num_vertices = prob.obstacles[i].verticesCCW().size();
         for (int j = 0; j < num_vertices; j++) {
-            x3 = prob_.obstacles[i].verticesCCW()[j][0];
-            y3 = prob_.obstacles[i].verticesCCW()[j][1];
-            x4 = prob_.obstacles[i].verticesCCW()[j+1][0];
-            y4 = prob_.obstacles[i].verticesCCW()[j+1][1];
+            x3 = prob.obstacles[i].verticesCCW()[j][0];
+            y3 = prob.obstacles[i].verticesCCW()[j][1];
+            x4 = prob.obstacles[i].verticesCCW()[j+1][0];
+            y4 = prob.obstacles[i].verticesCCW()[j+1][1];
             if (j == num_vertices-1) {
-                x4 = prob_.obstacles[i].verticesCCW()[0][0];
-                y4 = prob_.obstacles[i].verticesCCW()[0][1];
+                x4 = prob.obstacles[i].verticesCCW()[0][0];
+                y4 = prob.obstacles[i].verticesCCW()[0][1];
             }
             slope1 = (y2-y1)/(x2-x1);
             slope2 = (y4-y3)/(x4-x3);

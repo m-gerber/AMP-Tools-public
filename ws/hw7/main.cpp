@@ -6,8 +6,8 @@ int main(int argc, char** argv) {
 
     amp::main_helper helper;
 
-    bool plotE1 = 1;
-    bool printE1 = 0;
+    bool plotE1 = 0;
+    bool printE1 = 1;
     bool smoothing = 1;
     helper.runE1(plotE1, printE1, smoothing);
 

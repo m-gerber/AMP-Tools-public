@@ -39,17 +39,23 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
         amp::MyPRM2D prm_tester;
 
         amp::Path2D path_testerq1a = prm_tester.plan(q1a);
-        if (smoothing) path_testerq1a = pathSmoothing(path_testerq1a, q1a);
-        if (path_testerq1a.waypoints.size() > 0) amp::Visualizer::makeFigure(q1a, path_testerq1a);
+        if (path_testerq1a.waypoints.size() > 0) {
+            if (smoothing) path_testerq1a = pathSmoothing(path_testerq1a, q1a);
+            amp::Visualizer::makeFigure(q1a, path_testerq1a);
+        }
         
         amp::Path2D path_testerq1b1 = prm_tester.plan(q1b1);
-        if (smoothing) path_testerq1b1 = pathSmoothing(path_testerq1b1, q1b1);
-        if (path_testerq1b1.waypoints.size() > 0) amp::Visualizer::makeFigure(q1b1, path_testerq1b1);
+        if (path_testerq1b1.waypoints.size() > 0) {
+            if (smoothing) path_testerq1b1 = pathSmoothing(path_testerq1b1, q1b1);
+            amp::Visualizer::makeFigure(q1b1, path_testerq1b1);
+        }
 
         amp::Path2D path_testerq1b2 = prm_tester.plan(q1b2);
-        if (smoothing) path_testerq1b2 = pathSmoothing(path_testerq1b2, q1b2);
-        if (path_testerq1b2.waypoints.size() > 0) amp::Visualizer::makeFigure(q1b2, path_testerq1b2);
-
+        if (path_testerq1b2.waypoints.size() > 0) {
+            if (smoothing) path_testerq1b2 = pathSmoothing(path_testerq1b2, q1b2);
+            amp::Visualizer::makeFigure(q1b2, path_testerq1b2);
+        }
+        
         amp::Visualizer::showFigures();
 
     }
@@ -78,8 +84,8 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
 
             for (int j = 0; j < num_trials; j++) {
                 amp::Path2D path_testerq1a = q1_tester.plan(q1a);
-                if (smoothing) path_testerq1a = pathSmoothing(path_testerq1a, q1a);
                 if (path_testerq1a.waypoints.size() > 0) {
+                    if (smoothing) path_testerq1a = pathSmoothing(path_testerq1a, q1a);
                     num_successes++;
                     path_length += path_testerq1a.length();
                 }
@@ -88,14 +94,14 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
-            LOG("For Exercise 2.(a) of Homework 5 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
+            LOG("Round " << i << " for Exercise 2.(a) of Homework 5 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
             LOG("");
             LOG(" ----- SUCCESSES ------");
             LOG("num: " << num_successes << " (" << static_cast<double>(num_successes)/static_cast<double>(num_trials)*100.0 << "%)");
             LOG("");
             LOG(" ---- PATH LENGTH -----");
             LOG("total:     " << path_length);
-            LOG("per trial: " << path_length/static_cast<double>(num_trials));
+            LOG("per trial: " << path_length/static_cast<double>(num_successes));
             LOG("");
             LOG(" -- COMPUTATION TIME --");
             LOG("total:     " << duration.count()/1000.0 << " ms");
@@ -116,8 +122,8 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
 
             for (int j = 0; j < num_trials; j++) {
                 amp::Path2D path_testerq1b1 = q1_tester.plan(q1b1);
-                if (smoothing) path_testerq1b1 = pathSmoothing(path_testerq1b1, q1b1);
                 if (path_testerq1b1.waypoints.size() > 0) {
+                    if (smoothing) path_testerq1b1 = pathSmoothing(path_testerq1b1, q1b1);
                     num_successes++;
                     path_length += path_testerq1b1.length();
                 }
@@ -126,14 +132,14 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
-            LOG("For Exercise 2.(b) of Homework 5 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
+            LOG("Round " << i << " for Exercise 2.(b) of Homework 5 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
             LOG("");
             LOG(" ----- SUCCESSES ------");
             LOG("num: " << num_successes << " (" << static_cast<double>(num_successes)/static_cast<double>(num_trials)*100.0 << "%)");
             LOG("");
             LOG(" ---- PATH LENGTH -----");
             LOG("total:     " << path_length);
-            LOG("per trial: " << path_length/static_cast<double>(num_trials));
+            LOG("per trial: " << path_length/static_cast<double>(num_successes));
             LOG("");
             LOG(" -- COMPUTATION TIME --");
             LOG("total:     " << duration.count()/1000.0 << " ms");
@@ -154,8 +160,8 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
 
             for (int j = 0; j < num_trials; j++) {
                 amp::Path2D path_testerq1b2 = q1_tester.plan(q1b2);
-                if (smoothing) path_testerq1b2 = pathSmoothing(path_testerq1b2, q1b2);
                 if (path_testerq1b2.waypoints.size() > 0) {
+                    if (smoothing) path_testerq1b2 = pathSmoothing(path_testerq1b2, q1b2);
                     num_successes++;
                     path_length += path_testerq1b2.length();
                 }
@@ -164,14 +170,14 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool smoothing) {
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
-            LOG("For Exercise 2.(b) of Homework 2 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
+            LOG("Round " << i << " for Exercise 2.(b) of Homework 2 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
             LOG("");
             LOG(" ----- SUCCESSES ------");
             LOG("num: " << num_successes << " (" << static_cast<double>(num_successes)/static_cast<double>(num_trials)*100.0 << "%)");
             LOG("");
             LOG(" ---- PATH LENGTH -----");
             LOG("total:     " << path_length);
-            LOG("per trial: " << path_length/static_cast<double>(num_trials));
+            LOG("per trial: " << path_length/static_cast<double>(num_successes));
             LOG("");
             LOG(" -- COMPUTATION TIME --");
             LOG("total:     " << duration.count()/1000.0 << " ms");

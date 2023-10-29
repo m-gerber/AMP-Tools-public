@@ -114,13 +114,13 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
 
     amp::AStar::GraphSearchResult mySearchResult;
 
-    // problem.graph->print();
+    problem.graph->print();
 
     amp::Node init_node = problem.init_node;
     amp::Node goal_node = problem.goal_node;
 
-    // LOG("init node: " << init_node);
-    // LOG("goal node: " << goal_node);
+    LOG("init node: " << init_node);
+    LOG("goal node: " << goal_node);
 
     // Create vector for open list
     std::priority_queue<amp::Node_Info, std::vector<amp::Node_Info>, amp::Comparef> open_list;
@@ -139,17 +139,24 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
     bool goal_found = false;
     double goal_dist;
 
+    double prev_parent;
+
     int iter = 0;
    
-
     while(!open_list.empty()) {
         iter++;
 
-        // LOG("top: " << open_list.top().node);
+        if (open_list.top().g > 50) {
+            break;
+        }
         
         while (closed_list[open_list.top().node].parent != -1 && !open_list.empty()) {
             open_list.pop();
         }
+
+        // if (prev_parent == open_list.top().node) break;
+
+        LOG("top: " << open_list.top().node << " " << open_list.top().parent << " " << open_list.top().g << " " << open_list.top().h << " " << open_list.top().f);
         
         parent_node = open_list.top().node;
         closed_list[parent_node] = open_list.top();
@@ -164,7 +171,7 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
         const auto& outgoing_edges = problem.graph->outgoingEdges(parent_node);
 
         for (int i = 0; i < children.size(); i++) {
-            if (children[i] != parent_node) {
+            if (children[i] != parent_node && children[i] != prev_parent && closed_list[children[i]].node == -1) {
                 g = closed_list[parent_node].g + outgoing_edges[i];
                 h = heuristic.operator()(children[i]);
                 f = g + h;
@@ -174,9 +181,11 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
                     goal_found = true;
                     goal_dist = update_info.f;
                 }
+                LOG("update_info: " << update_info.node << " " << update_info.parent << " " << update_info.g << " " << update_info.h << " " << update_info.f);
             }
-            // LOG("update_info: " << update_info.node << " " << update_info.parent << " " << update_info.g << " " << update_info.h << " " << update_info.f);
         }
+        PAUSE;
+        prev_parent = parent_node;
     }
 
     mySearchResult.success = goal_found;
@@ -204,6 +213,8 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
 
         // LOG("This path took " << iter << " iterations.");
         // LOG("The length of this path is " << closed_list[goal_node].f << ".");
+    } else {
+        LOG("no valid path");
     }
 
     return mySearchResult;

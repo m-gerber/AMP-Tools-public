@@ -172,4 +172,6 @@ class GridCSpace2D : public ConfigurationSpace2D, public DenseArray2D<bool> {
         virtual ~GridCSpace2D() {}
 };
 
+}
+
 #include "public/ConfigurationSpace_impl.h"

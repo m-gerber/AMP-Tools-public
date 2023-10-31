@@ -2,7 +2,6 @@
 #include "MyGoalBiasRRT2D.h"
 
 #include <vector>
-#include <map>
 #include <Eigen/Core>
 
 amp::Path2D amp::MyGoalBiasRRT2D::plan(const amp::Problem2D& problem) {
@@ -114,11 +113,16 @@ amp::Path2D amp::MyGoalBiasRRT2D::plan(const amp::Problem2D& problem) {
         // }
     }
 
+
+
     // LOG("min dist: " << min_dist);
 
     // pathProblem.graph->print();
 
     if (goal_found) {
+        graph_ = *pathProblem.graph;
+        map_ = map;
+
         amp::MyAStarAlgo aStar;
         pathProblem.init_node = 0;
         pathProblem.goal_node = map.size()-1;
@@ -130,8 +134,15 @@ amp::Path2D amp::MyGoalBiasRRT2D::plan(const amp::Problem2D& problem) {
             path.waypoints.push_back(map.at(element));
         }
 
+        // pathProblem.graph = nullptr;
+        // map.clear();
+
         return path;
     }
+
+    // pathProblem.graph = nullptr;
+    // map.clear();
+
     return amp::Path2D();
 }
 

@@ -34,27 +34,74 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
     amp::Problem2D q1b1 = amp::HW2::getWorkspace1();
     amp::Problem2D q1b2 = amp::HW2::getWorkspace2();
 
+    bool goal_found;
+    int iter;
+
     if (verbose) {
 
-        amp::MyPRM2D prm_tester;
+        int n_a = 200;
+        double r_a = 1;
+        amp::MyPRM2D prm_tester_a(n_a,r_a);
 
-        amp::Path2D prm_path_testerq1a = prm_tester.plan(q1a);
-        if (prm_path_testerq1a.waypoints.size() > 0) {
-            if (smoothing) prm_path_testerq1a = pathSmoothing(prm_path_testerq1a, q1a);
-            amp::Visualizer::makeFigure(q1a, prm_path_testerq1a);
-        }
-        
-        amp::Path2D prm_path_testerq1b1 = prm_tester.plan(q1b1);
-        if (prm_path_testerq1b1.waypoints.size() > 0) {
-            if (smoothing) prm_path_testerq1b1 = pathSmoothing(prm_path_testerq1b1, q1b1);
-            amp::Visualizer::makeFigure(q1b1, prm_path_testerq1b1);
+        Graph<double> graph;
+        std::map<amp::Node, Eigen::Vector2d> map;
+
+        goal_found = false;
+        iter = 0;
+        while (!goal_found) {
+            iter++;
+            if (iter % 20 == 0) LOG("Trial for 1a: " << iter);
+            amp::Path2D prm_path_testerq1a = prm_tester_a.plan(q1a);
+            
+            if (prm_path_testerq1a.waypoints.size() > 0) {
+                if (smoothing) prm_path_testerq1a = pathSmoothing(prm_path_testerq1a, q1a);
+                // graph = prm_tester_a.returnGraph();
+                // map = prm_tester_a.returnMap();
+                amp::Visualizer::makeFigure(q1a, prm_path_testerq1a);
+                // amp::Visualizer::makeFigure(q1a, graph, map);
+                goal_found = true;
+                LOG("Exercise 1a took " << iter << " trial(s) with path length: " << prm_path_testerq1a.length() << " for n = " << n_a << " and r = " << r_a << ".");
+            }
         }
 
-        amp::Path2D prm_path_testerq1b2 = prm_tester.plan(q1b2);
-        if (prm_path_testerq1b2.waypoints.size() > 0) {
-            if (smoothing) prm_path_testerq1b2 = pathSmoothing(prm_path_testerq1b2, q1b2);
-            amp::Visualizer::makeFigure(q1b2, prm_path_testerq1b2);
+        int n_b = 200;
+        double r_b = 2;
+        amp::MyPRM2D prm_tester_b(n_b,r_b);
+
+        goal_found = false;
+        iter = 0;
+        while (!goal_found) {
+            iter++;
+            if (iter % 20 == 0) LOG("Trial for 1b1: " << iter);
+            amp::Path2D prm_path_testerq1b1 = prm_tester_b.plan(q1b1);
+            if (prm_path_testerq1b1.waypoints.size() > 0) {
+                if (smoothing) prm_path_testerq1b1 = pathSmoothing(prm_path_testerq1b1, q1b1);
+                // graph = prm_tester_b.returnGraph();
+                // map = prm_tester_b.returnMap();
+                amp::Visualizer::makeFigure(q1b1, prm_path_testerq1b1);
+                // amp::Visualizer::makeFigure(q1b1, graph, map);
+                goal_found = true;
+                LOG("Exercise 1b1 took " << iter << " trial(s) with path length: " << prm_path_testerq1b1.length() << " for n = " << n_b << " and r = " << r_b << ".");
+            }
         }
+
+        // goal_found = false;
+        // iter = 0;
+        // while (!goal_found) {
+        //     iter++;
+        //     if (iter % 20 == 0) LOG("Trial for 1b2: " << iter);
+        //     amp::Path2D prm_path_testerq1b2 = prm_tester_b.plan(q1b2);
+        //     if (prm_path_testerq1b2.waypoints.size() > 0) {
+        //         if (smoothing) prm_path_testerq1b2 = pathSmoothing(prm_path_testerq1b2, q1b2);
+        //         graph = prm_tester_b.returnGraph();
+        //         map = prm_tester_b.returnMap();
+        //         amp::Visualizer::makeFigure(q1b2, prm_path_testerq1b2);
+        //         // amp::Visualizer::makeFigure(q1b1, graph,  [map](amp::Node node) -> Eigen::Vector2d { return map.at(node); });
+        //         amp::Visualizer::makeFigure(q1b1, graph, map);
+        //         goal_found = true;
+        //         LOG("Exercise 1b2 took " << iter << " trial(s) with path length: " << prm_path_testerq1b2.length() << " for n = " << n_b << " and r = " << r_b << ".");
+        //     }
+        // }
         
         amp::Visualizer::showFigures();
 
@@ -244,26 +291,65 @@ void amp::main_helper::runE2(bool verbose, bool verbose2, bool verbose3, bool sm
     amp::Problem2D q1b1 = amp::HW2::getWorkspace1();
     amp::Problem2D q1b2 = amp::HW2::getWorkspace2();
 
+    bool goal_found;
+    int iter;
+
     if (verbose) {
 
         amp::MyGoalBiasRRT2D rrt_tester;
 
-        amp::Path2D rrt_path_testerq1a = rrt_tester.plan(q1a);
-        if (rrt_path_testerq1a.waypoints.size() > 0) {
-            if (smoothing) rrt_path_testerq1a = pathSmoothing(rrt_path_testerq1a, q1a);
-            amp::Visualizer::makeFigure(q1a, rrt_path_testerq1a);
-        }
+        Graph<double> graph;
+        std::map<amp::Node, Eigen::Vector2d> map;
+
+        // goal_found = false;
+        // iter = 0;
+        // while (!goal_found) {
+        //     iter++;
+        //     amp::Path2D rrt_path_testerq1a = rrt_tester.plan(q1a);
+        //     if (rrt_path_testerq1a.waypoints.size() > 0) {
+        //         if (smoothing) rrt_path_testerq1a = pathSmoothing(rrt_path_testerq1a, q1a);
+        //         graph = rrt_tester.returnGraph();
+        //         map = rrt_tester.returnMap();
+        //         amp::Visualizer::makeFigure(q1a, rrt_path_testerq1a);
+        //         // amp::Visualizer::makeFigure(q1a, graph, [map](amp::Node node) -> Eigen::Vector2d { return map.at(node); });
+        //         amp::Visualizer::makeFigure(q1a, graph, map);
+        //         goal_found = true;
+        //         LOG("Exercise 2a took " << iter << " trial(s) with path length: " << rrt_path_testerq1a.length() << ".");
+        //     }
+        // }
         
-        amp::Path2D rrt_path_testerq1b1 = rrt_tester.plan(q1b1);
-        if (rrt_path_testerq1b1.waypoints.size() > 0) {
-            if (smoothing) rrt_path_testerq1b1 = pathSmoothing(rrt_path_testerq1b1, q1b1);
-            amp::Visualizer::makeFigure(q1b1, rrt_path_testerq1b1);
+        goal_found = false;
+        iter = 0;
+        while (!goal_found) {
+            iter++;
+            amp::Path2D rrt_path_testerq1b1 = rrt_tester.plan(q1b1);
+            if (rrt_path_testerq1b1.waypoints.size() > 0) {
+                if (smoothing) rrt_path_testerq1b1 = pathSmoothing(rrt_path_testerq1b1, q1a);
+                graph = rrt_tester.returnGraph();
+                map = rrt_tester.returnMap();
+                amp::Visualizer::makeFigure(q1b1, rrt_path_testerq1b1);
+                // amp::Visualizer::makeFigure(q1b1, graph, [map](amp::Node node) -> Eigen::Vector2d { return map.at(node); });
+                amp::Visualizer::makeFigure(q1b1, graph, map);
+                goal_found = true;
+                LOG("Exercise 2b took " << iter << " trial(s) with path length: " << rrt_path_testerq1b1.length() << ".");
+            }
         }
 
-        amp::Path2D rrt_path_testerq1b2 = rrt_tester.plan(q1b2);
-        if (rrt_path_testerq1b2.waypoints.size() > 0) {
-            if (smoothing) rrt_path_testerq1b2 = pathSmoothing(rrt_path_testerq1b2, q1b2);
-            amp::Visualizer::makeFigure(q1b2, rrt_path_testerq1b2);
+        goal_found = false;
+        iter = 0;
+        while (!goal_found) {
+            iter++;
+            amp::Path2D rrt_path_testerq1b2 = rrt_tester.plan(q1b2);
+            if (rrt_path_testerq1b2.waypoints.size() > 0) {
+                if (smoothing) rrt_path_testerq1b2 = pathSmoothing(rrt_path_testerq1b2, q1b2);
+                graph = rrt_tester.returnGraph();
+                map = rrt_tester.returnMap();
+                amp::Visualizer::makeFigure(q1b2, rrt_path_testerq1b2);
+                // amp::Visualizer::makeFigure(q1b2, graph, [map](amp::Node node) -> Eigen::Vector2d { return map.at(node); });
+                // amp::Visualizer::makeFigure(q1b2, graph, map);
+                goal_found = true;
+                LOG("Exercise 2c took " << iter << " trial(s) with path length: " << rrt_path_testerq1b2.length() << ".");
+            }
         }
         
         amp::Visualizer::showFigures();

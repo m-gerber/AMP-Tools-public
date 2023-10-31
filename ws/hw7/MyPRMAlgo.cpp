@@ -30,6 +30,7 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
     prob_ = problem;
 
     double x1,y1,x2,y2,dx,dy,dist;
+    std::map<amp::Node, Eigen::Vector2d> map;
     std::vector<Eigen::Vector2d> sampled_points;
     amp::LookupSearchHeuristic heuristic;
 
@@ -40,6 +41,9 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
     sampled_points.push_back(problem.q_init);
     sampled_points.push_back(problem.q_goal);
 
+    map.insert({0,problem.q_init});
+    map.insert({1,problem.q_goal});
+
     // amp::Graph<double> graph;
 
     double x_min = problem.x_min;
@@ -47,16 +51,25 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
     double y_min = problem.y_min;
     double y_max = problem.y_max;
 
+    int ind = 2;
+
     for (int i = 0; i < n_+2; i++) {
         x1 = amp::RNG::randd(x_min,x_max);
         y1 = amp::RNG::randd(y_min,y_max);
         if(!inPolygon(x1, y1)) sampled_points.push_back(Eigen::Vector2d({x1,y1}));
+        if(!inPolygon(x1, y1)) {
+            map.insert({ind,Eigen::Vector2d({x1,y1})});
+            ind++;
+        }
     }
 
-    for (int i = 0; i < sampled_points.size(); i++) {
+    for (int i = 0; i < map.size(); i++) {
         
         x1 = sampled_points[i][0];
         y1 = sampled_points[i][1];
+
+        x1 = map.at(i)[0];
+        y1 = map.at(i)[1];
         dx = problem.q_goal[0] - x1;
         dy = problem.q_goal[1] - y1;
         dist = sqrt((dx*dx)+(dy*dy));
@@ -66,6 +79,9 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
         for (int j = i+1; j < sampled_points.size(); j++) {
             x2 = sampled_points[j][0];
             y2 = sampled_points[j][1];
+
+            x2 = map.at(j)[0];
+            y2 = map.at(j)[1];
 
             dx = x2 - x1;
             dy = y2 - y1;
@@ -84,16 +100,21 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
         }
     }
 
+    // map_ = map;
+    // graph_ = *pathProblem.graph;
+
     amp::MyAStarAlgo aStar;
     // amp::ShortestPathProblem pathProblem;
     // pathProblem.graph = std::make_shared<Graph<double>>(graph);
 	pathProblem.init_node = 0;
 	pathProblem.goal_node = 1;
-    amp::AStar::GraphSearchResult searchResult = aStar.search(pathProblem, heuristic);
-    
+    //amp::AStar::GraphSearchResult searchResult = aStar.search(pathProblem, heuristic);
+    DEBUG("b4 astar");
+    amp::AStar::GraphSearchResult searchResult = aStar.search(pathProblem, amp::SearchHeuristic());
+    DEBUG("af astar");
+    // map.clear();
     // pathProblem.graph->clear();
-    // pathProblem.graph = nullptr;
-    // graph.clear();
+    //pathProblem.graph = nullptr;
 
     // amp::ShortestPathProblem pathEx3 = HW6::getEx3SPP();
     // amp::AStar::GraphSearchResult searchResult = aStar.search(pathEx3, heuristic);
@@ -103,7 +124,7 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
     for (const auto& element : searchResult.node_path) {
         path.waypoints.push_back(sampled_points[element]);
     }
-
+    DEBUG("returning path");
     return path;
 }
 

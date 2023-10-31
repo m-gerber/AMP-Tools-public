@@ -21,7 +21,6 @@ int main(int argc, char** argv) {
     bool boxE2     = 0;   // Plot the boxplots for the trials
     helper.runE2(plotE2, trialsE2, boxE2, smoothing, num_trials);
 
-
     amp::HW7::grade<amp::MyPRM2D, amp::MyGoalBiasRRT2D>("mage7128@colorado.edu", argc, argv);
 
     return 0;

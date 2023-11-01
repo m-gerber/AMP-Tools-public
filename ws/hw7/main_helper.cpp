@@ -32,7 +32,7 @@ amp::Path2D amp::main_helper::pathSmoothing(amp::Path2D path, amp::Problem2D pro
     return path;
 }
 
-void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool smoothing, int num_trials) {
+void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool verbose4, bool smoothing, int num_trials) {
 
     amp::Problem2D q1a  = amp::HW5::getWorkspace1();
     amp::Problem2D q1b1 = amp::HW2::getWorkspace1();
@@ -167,19 +167,21 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
                 sum_comp_timeq1a += vec_comp_timeq1a[i];
             }
 
-            LOG("Round " << i << " for Exercise 2.(a) of Homework 5 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
-            LOG("");
-            LOG(" ----- SUCCESSES ------");
-            LOG("num: " << num_successesq1a << " (" << static_cast<double>(num_successesq1a)/static_cast<double>(num_trials)*100.0 << "%)");
-            LOG("");
-            LOG(" ---- PATH LENGTH -----");
-            LOG("per trial: " << sum_path_lengthq1a/static_cast<double>(num_successesq1a));
-            LOG("");
-            LOG(" -- COMPUTATION TIME --");
-            LOG("total:     " << sum_comp_timeq1a << " ms");
-            LOG("per trial: " << sum_comp_timeq1a/static_cast<double>(num_trials) << " ms");
-            LOG("");
-            LOG("");
+            if (verbose3) {
+                LOG("Round " << i << " for Exercise 2.(a) of Homework 5 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
+                LOG("");
+                LOG(" ----- SUCCESSES ------");
+                LOG("num: " << num_successesq1a << " (" << static_cast<double>(num_successesq1a)/static_cast<double>(num_trials)*100.0 << "%)");
+                LOG("");
+                LOG(" ---- PATH LENGTH -----");
+                LOG("per trial: " << sum_path_lengthq1a/static_cast<double>(num_successesq1a));
+                LOG("");
+                LOG(" -- COMPUTATION TIME --");
+                LOG("total:     " << sum_comp_timeq1a << " ms");
+                LOG("per trial: " << sum_comp_timeq1a/static_cast<double>(num_trials) << " ms");
+                LOG("");
+                LOG("");
+            }
 
         }
 
@@ -198,11 +200,11 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
 
             for (int j = 0; j < num_trials; j++) {
                 auto start = std::chrono::high_resolution_clock::now();
-                amp::Path2D prm_path_testerq1a = q1_tester.plan(q1a);
-                if (prm_path_testerq1a.waypoints.size() > 0) {
-                    if (smoothing) prm_path_testerq1a = pathSmoothing(prm_path_testerq1a, q1a);
+                amp::Path2D prm_path_testerq1b1 = q1_tester.plan(q1b1);
+                if (prm_path_testerq1b1.waypoints.size() > 0) {
+                    if (smoothing) prm_path_testerq1b1 = pathSmoothing(prm_path_testerq1b1, q1b1);
                     num_successesq1b1++;
-                    vec_path_lengthq1b1.push_back(prm_path_testerq1a.length());
+                    vec_path_lengthq1b1.push_back(prm_path_testerq1b1.length());
                 } else {
                     vec_path_lengthq1b1.push_back(0);
                 }
@@ -218,23 +220,25 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
             double sum_comp_timeq1b1 = 0;
 
             for (int k = 0; k < num_trials; k++) {
-                sum_path_lengthq1b1 += vec_path_lengthq1a[i];
-                sum_comp_timeq1b1 += vec_comp_timeq1a[i];
+                sum_path_lengthq1b1 += vec_path_lengthq1b1[i];
+                sum_comp_timeq1b1 += vec_comp_timeq1b1[i];
             }
 
-            LOG("Round " << i << " for Exercise 2.(b) of Homework 2 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
-            LOG("");
-            LOG(" ----- SUCCESSES ------");
-            LOG("num: " << num_successesq1b1 << " (" << static_cast<double>(num_successesq1b1)/static_cast<double>(num_trials)*100.0 << "%)");
-            LOG("");
-            LOG(" ---- PATH LENGTH -----");
-            LOG("per trial: " << sum_path_lengthq1b1/static_cast<double>(num_successesq1b1));
-            LOG("");
-            LOG(" -- COMPUTATION TIME --");
-            LOG("total:     " << sum_comp_timeq1b1 << " ms");
-            LOG("per trial: " << sum_comp_timeq1b1/static_cast<double>(num_trials) << " ms");
-            LOG("");
-            LOG("");
+            if (verbose3) {
+                LOG("Round " << i << " for Exercise 2.(b) of Homework 2 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
+                LOG("");
+                LOG(" ----- SUCCESSES ------");
+                LOG("num: " << num_successesq1b1 << " (" << static_cast<double>(num_successesq1b1)/static_cast<double>(num_trials)*100.0 << "%)");
+                LOG("");
+                LOG(" ---- PATH LENGTH -----");
+                LOG("per trial: " << sum_path_lengthq1b1/static_cast<double>(num_successesq1b1));
+                LOG("");
+                LOG(" -- COMPUTATION TIME --");
+                LOG("total:     " << sum_comp_timeq1b1 << " ms");
+                LOG("per trial: " << sum_comp_timeq1b1/static_cast<double>(num_trials) << " ms");
+                LOG("");
+                LOG("");
+            }
 
         }
 
@@ -253,11 +257,11 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
 
             for (int j = 0; j < num_trials; j++) {
                 auto start = std::chrono::high_resolution_clock::now();
-                amp::Path2D prm_path_testerq1a = q1_tester.plan(q1a);
-                if (prm_path_testerq1a.waypoints.size() > 0) {
-                    if (smoothing) prm_path_testerq1a = pathSmoothing(prm_path_testerq1a, q1a);
+                amp::Path2D prm_path_testerq1b2 = q1_tester.plan(q1b2);
+                if (prm_path_testerq1b2.waypoints.size() > 0) {
+                    if (smoothing) prm_path_testerq1b2 = pathSmoothing(prm_path_testerq1b2, q1b2);
                     num_successesq1b2++;
-                    vec_path_lengthq1b2.push_back(prm_path_testerq1a.length());
+                    vec_path_lengthq1b2.push_back(prm_path_testerq1b2.length());
                 } else {
                     vec_path_lengthq1b2.push_back(0);
                 }
@@ -273,27 +277,29 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
             double sum_comp_timeq1b2 = 0;
 
             for (int k = 0; k < num_trials; k++) {
-                sum_path_lengthq1b2 += vec_path_lengthq1a[i];
-                sum_comp_timeq1b2 += vec_comp_timeq1a[i];
+                sum_path_lengthq1b2 += vec_path_lengthq1b2[i];
+                sum_comp_timeq1b2 += vec_comp_timeq1b2[i];
             }
 
-            LOG("Round " << i << " for Exercise 2.(b) of Homework 2 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
-            LOG("");
-            LOG(" ----- SUCCESSES ------");
-            LOG("num: " << num_successesq1b2 << " (" << static_cast<double>(num_successesq1b2)/static_cast<double>(num_trials)*100.0 << "%)");
-            LOG("");
-            LOG(" ---- PATH LENGTH -----");
-            LOG("per trial: " << sum_path_lengthq1b2/static_cast<double>(num_successesq1b2));
-            LOG("");
-            LOG(" -- COMPUTATION TIME --");
-            LOG("total:     " << sum_comp_timeq1b2 << " ms");
-            LOG("per trial: " << sum_comp_timeq1b2/static_cast<double>(num_trials) << " ms");
-            LOG("");
-            LOG("");
+            if (verbose3) {
+                LOG("Round " << i << " for Exercise 2.(b) of Homework 2 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
+                LOG("");
+                LOG(" ----- SUCCESSES ------");
+                LOG("num: " << num_successesq1b2 << " (" << static_cast<double>(num_successesq1b2)/static_cast<double>(num_trials)*100.0 << "%)");
+                LOG("");
+                LOG(" ---- PATH LENGTH -----");
+                LOG("per trial: " << sum_path_lengthq1b2/static_cast<double>(num_successesq1b2));
+                LOG("");
+                LOG(" -- COMPUTATION TIME --");
+                LOG("total:     " << sum_comp_timeq1b2 << " ms");
+                LOG("per trial: " << sum_comp_timeq1b2/static_cast<double>(num_trials) << " ms");
+                LOG("");
+                LOG("");
+            }
 
         }
 
-        if (verbose3) {
+        if (verbose4) {
             title_success = "Number of Successes Env. 1 (PRM)";
             title_path = "Path Length Env. 1 (PRM)";
             title_comp = "Computation Time Env. 1 (PRM)";
@@ -400,23 +406,22 @@ void amp::main_helper::runE2(bool verbose, bool verbose2, bool verbose3, bool sm
     }
 
     if (verbose2) {
-
-        std::vector<std::string> labels;
+        
+        amp::MyGoalBiasRRT2D q2_tester;
 
         std::string title_success;
         std::string title_path;
         std::string title_comp;
-        labels.push_back("n = 5000, r = 0.5, p_goal = 0.05, epsilon = 0.25");
+        std::vector<std::string> labels = {"Env. 1", "Env. 2", "Env. 3"};
         
         std::string xlabel = "Trial";
         std::string ylabel;
 
-        double num_successesq1a = 0;
+        std::list<std::vector<double>> path_length, comp_time;
+        std::vector<double> vec_num_successes;
 
-        std::vector<double> vec_num_successesq1a, vec_path_lengthq1a, vec_comp_timeq1a;
-        std::list<std::vector<double>> path_lengthq1a, comp_timeq1a;
-        
-        amp::MyGoalBiasRRT2D q2_tester;
+        double num_successesq1a = 0;
+        std::vector<double> vec_path_lengthq1a, vec_comp_timeq1a;
 
         for (int j = 0; j < num_trials; j++) {
             auto start = std::chrono::high_resolution_clock::now();
@@ -432,14 +437,12 @@ void amp::main_helper::runE2(bool verbose, bool verbose2, bool verbose3, bool sm
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
             vec_comp_timeq1a.push_back(duration.count()/1000.0);
         }
-        vec_num_successesq1a.push_back(num_successesq1a);
-        path_lengthq1a.push_back(vec_path_lengthq1a);
-        comp_timeq1a.push_back(vec_comp_timeq1a);
+        vec_num_successes.push_back(num_successesq1a);
+        path_length.push_back(vec_path_lengthq1a);
+        comp_time.push_back(vec_comp_timeq1a);
 
         double num_successesq1b1 = 0;
-
-        std::vector<double> vec_num_successesq1b1, vec_path_lengthq1b1, vec_comp_timeq1b1;
-        std::list<std::vector<double>> path_lengthq1b1, comp_timeq1b1;
+        std::vector<double> vec_path_lengthq1b1, vec_comp_timeq1b1;
 
         for (int j = 0; j < num_trials; j++) {
             auto start = std::chrono::high_resolution_clock::now();
@@ -455,14 +458,12 @@ void amp::main_helper::runE2(bool verbose, bool verbose2, bool verbose3, bool sm
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
             vec_comp_timeq1b1.push_back(duration.count()/1000.0);
         }
-        vec_num_successesq1b1.push_back(num_successesq1b1);
-        path_lengthq1b1.push_back(vec_path_lengthq1b1);
-        comp_timeq1b1.push_back(vec_comp_timeq1b1);
+        vec_num_successes.push_back(num_successesq1b1);
+        path_length.push_back(vec_path_lengthq1b1);
+        comp_time.push_back(vec_comp_timeq1b1);
 
         double num_successesq1b2 = 0;
-
-        std::vector<double> vec_num_successesq1b2, vec_path_lengthq1b2, vec_comp_timeq1b2;
-        std::list<std::vector<double>> path_lengthq1b2, comp_timeq1b2;
+        std::vector<double> vec_path_lengthq1b2, vec_comp_timeq1b2;
 
         for (int j = 0; j < num_trials; j++) {
             auto start = std::chrono::high_resolution_clock::now();
@@ -478,40 +479,40 @@ void amp::main_helper::runE2(bool verbose, bool verbose2, bool verbose3, bool sm
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
             vec_comp_timeq1b2.push_back(duration.count()/1000.0);
         }
-        vec_num_successesq1b2.push_back(num_successesq1b2);
-        path_lengthq1b2.push_back(vec_path_lengthq1b2);
-        comp_timeq1b2.push_back(vec_comp_timeq1b2);
+        vec_num_successes.push_back(num_successesq1b2);
+        path_length.push_back(vec_path_lengthq1b2);
+        comp_time.push_back(vec_comp_timeq1b2);
 
         if (verbose3) {
-            title_success = "Number of Successes Env. 1 (RRT)";
-            title_path = "Path Length Env. 1 (RRT)";
-            title_comp = "Computation Time Env. 1 (RRT)";
+            title_success = "Number of Successes (RRT)";
+            title_path = "Path Length (RRT)";
+            title_comp = "Computation Time (RRT)";
             ylabel = "Number of Successes";
-            amp::Visualizer::makeBarGraph(vec_num_successesq1a,  labels, title_success, xlabel, ylabel);
+            amp::Visualizer::makeBarGraph(vec_num_successes,  labels, title_success, xlabel, ylabel);
             ylabel = "Path Length";
-            amp::Visualizer::makeBoxPlot(path_lengthq1a,         labels, title_path,    xlabel, ylabel);
+            amp::Visualizer::makeBoxPlot(path_length,         labels, title_path,    xlabel, ylabel);
             ylabel = "Computation Time (ms)";
-            amp::Visualizer::makeBoxPlot(comp_timeq1a,           labels, title_comp,    xlabel, ylabel);
+            amp::Visualizer::makeBoxPlot(comp_time,           labels, title_comp,    xlabel, ylabel);
 
-            title_success = "Number of Successes Env. 2 (RRT)";
-            title_path = "Path Length Env. 2 (RRT)";
-            title_comp = "Computation Time Env. 2 (RRT)";
-            ylabel = "Number of Successes";
-            amp::Visualizer::makeBarGraph(vec_num_successesq1b1, labels, title_success, xlabel, ylabel);
-            ylabel = "Path Length";
-            amp::Visualizer::makeBoxPlot(path_lengthq1b1,        labels, title_path,    xlabel, ylabel);
-            ylabel = "Computation Time (ms)";
-            amp::Visualizer::makeBoxPlot(comp_timeq1b1,          labels, title_comp,    xlabel, ylabel);
+            // title_success = "Number of Successes Env. 2 (RRT)";
+            // title_path = "Path Length Env. 2 (RRT)";
+            // title_comp = "Computation Time Env. 2 (RRT)";
+            // ylabel = "Number of Successes";
+            // amp::Visualizer::makeBarGraph(vec_num_successesq1b1, labels, title_success, xlabel, ylabel);
+            // ylabel = "Path Length";
+            // amp::Visualizer::makeBoxPlot(path_lengthq1b1,        labels, title_path,    xlabel, ylabel);
+            // ylabel = "Computation Time (ms)";
+            // amp::Visualizer::makeBoxPlot(comp_timeq1b1,          labels, title_comp,    xlabel, ylabel);
 
-            title_success = "Number of Successes Env. 3 (RRT)";
-            title_path = "Path Length Env. 3 (RRT)";
-            title_comp = "Computation Time Env. 3 (RRT)";
-            ylabel = "Number of Successes";
-            amp::Visualizer::makeBarGraph(vec_num_successesq1b2, labels, title_success, xlabel, ylabel);
-            ylabel = "Path Length";
-            amp::Visualizer::makeBoxPlot(path_lengthq1b2,        labels, title_path,    xlabel, ylabel);
-            ylabel = "Computation Time (ms)";
-            amp::Visualizer::makeBoxPlot(comp_timeq1b2,          labels, title_comp,    xlabel, ylabel);
+            // title_success = "Number of Successes Env. 3 (RRT)";
+            // title_path = "Path Length Env. 3 (RRT)";
+            // title_comp = "Computation Time Env. 3 (RRT)";
+            // ylabel = "Number of Successes";
+            // amp::Visualizer::makeBarGraph(vec_num_successesq1b2, labels, title_success, xlabel, ylabel);
+            // ylabel = "Path Length";
+            // amp::Visualizer::makeBoxPlot(path_lengthq1b2,        labels, title_path,    xlabel, ylabel);
+            // ylabel = "Computation Time (ms)";
+            // amp::Visualizer::makeBoxPlot(comp_timeq1b2,          labels, title_comp,    xlabel, ylabel);
 
             amp::Visualizer::showFigures();
         }

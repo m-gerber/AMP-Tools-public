@@ -321,22 +321,22 @@ void amp::main_helper::runE2(bool verbose, bool verbose2, bool verbose3, bool sm
 
     if (verbose) {
 
-        amp::MyGoalBiasRRT2D rrt_tester;
+        amp::MyGoalBiasRRT2D rrt_testerq1a, rrt_testerq1b1, rrt_testerq1b2;
 
-        Graph<double> graph;
-        std::map<amp::Node, Eigen::Vector2d> map;
+        Graph<double> graphq1a, graphq1b1, graphq1b2;
+        std::map<amp::Node, Eigen::Vector2d> mapq1a, mapq1b1, mapq1b2;
 
         goal_found = false;
         iter = 0;
         while (!goal_found) {
             iter++;
-            amp::Path2D rrt_path_testerq1a = rrt_tester.plan(q1a);
+            amp::Path2D rrt_path_testerq1a = rrt_testerq1a.plan(q1a);
             if (rrt_path_testerq1a.waypoints.size() > 0) {
                 if (smoothing) rrt_path_testerq1a = pathSmoothing(rrt_path_testerq1a, q1a);
-                graph = rrt_tester.returnGraph();
-                map = rrt_tester.returnMap();
+                graphq1a = rrt_testerq1a.returnGraph();
+                mapq1a = rrt_testerq1a.returnMap();
                 amp::Visualizer::makeFigure(q1a, rrt_path_testerq1a);
-                amp::Visualizer::makeFigure(q1a, graph, map);
+                amp::Visualizer::makeFigure(q1a, graphq1a, mapq1a);
                 goal_found = true;
                 LOG("Exercise 2a took " << iter << " trial(s) with path length: " << rrt_path_testerq1a.length() << ".");
             }
@@ -346,13 +346,13 @@ void amp::main_helper::runE2(bool verbose, bool verbose2, bool verbose3, bool sm
         iter = 0;
         while (!goal_found) {
             iter++;
-            amp::Path2D rrt_path_testerq1b1 = rrt_tester.plan(q1b1);
+            amp::Path2D rrt_path_testerq1b1 = rrt_testerq1b1.plan(q1b1);
             if (rrt_path_testerq1b1.waypoints.size() > 0) {
                 if (smoothing) rrt_path_testerq1b1 = pathSmoothing(rrt_path_testerq1b1, q1a);
-                graph = rrt_tester.returnGraph();
-                map = rrt_tester.returnMap();
+                graphq1b1 = rrt_testerq1b1.returnGraph();
+                mapq1b1 = rrt_testerq1b1.returnMap();
                 amp::Visualizer::makeFigure(q1b1, rrt_path_testerq1b1);
-                amp::Visualizer::makeFigure(q1b1, graph, map);
+                amp::Visualizer::makeFigure(q1b1, graphq1b1, mapq1b1);
                 goal_found = true;
                 LOG("Exercise 2b took " << iter << " trial(s) with path length: " << rrt_path_testerq1b1.length() << ".");
             }
@@ -362,13 +362,13 @@ void amp::main_helper::runE2(bool verbose, bool verbose2, bool verbose3, bool sm
         iter = 0;
         while (!goal_found) {
             iter++;
-            amp::Path2D rrt_path_testerq1b2 = rrt_tester.plan(q1b2);
+            amp::Path2D rrt_path_testerq1b2 = rrt_testerq1b2.plan(q1b2);
             if (rrt_path_testerq1b2.waypoints.size() > 0) {
                 if (smoothing) rrt_path_testerq1b2 = pathSmoothing(rrt_path_testerq1b2, q1b2);
-                graph = rrt_tester.returnGraph();
-                map = rrt_tester.returnMap();
+                graphq1b2 = rrt_testerq1b2.returnGraph();
+                mapq1b2 = rrt_testerq1b2.returnMap();
                 amp::Visualizer::makeFigure(q1b2, rrt_path_testerq1b2);
-                amp::Visualizer::makeFigure(q1b2, graph, map);
+                amp::Visualizer::makeFigure(q1b2, graphq1b2, mapq1b2);
                 goal_found = true;
                 LOG("Exercise 2c took " << iter << " trial(s) with path length: " << rrt_path_testerq1b2.length() << ".");
             }

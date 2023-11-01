@@ -2,10 +2,11 @@
 #include <queue>
 
 amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathProblem& problem, const amp::SearchHeuristic& heuristic) {
-    DEBUG("in astar");
+    // DEBUG("in astar");
 
     amp::AStar::GraphSearchResult mySearchResult;
     {
+
     // problem.graph->print();
 
     amp::Node init_node = problem.init_node;
@@ -18,7 +19,8 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
     open_list.push(init_info);
     
     // Create a vector for the closed list
-    std::vector<amp::Node_Info> closed_list(problem.graph->nodes().size());
+    int biggest_node = problem.graph->nodes()[problem.graph->nodes().size()-1];
+    std::vector<amp::Node_Info> closed_list(biggest_node+1);
     closed_list[init_node] = init_info;
     int parent_node;
 
@@ -31,7 +33,7 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
     double prev_parent = -2;
 
     int iter = 0;
-    DEBUG("b4 loop");
+    // DEBUG("b4 loop");
     while(!open_list.empty()) {
         iter++;
         
@@ -74,9 +76,9 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
         // PAUSE;
         prev_parent = parent_node;
     }
-    DEBUG("af loop");
+    // DEBUG("af loop");
     mySearchResult.success = goal_found;
-    DEBUG("goal found: " << goal_found);
+    // DEBUG("goal found: " << goal_found);
 
     if (goal_found) {
         mySearchResult.path_cost = closed_list[goal_node].f;
@@ -102,9 +104,9 @@ amp::AStar::GraphSearchResult amp::MyAStarAlgo::search(const amp::ShortestPathPr
         // LOG("This path took " << iter << " iterations.");
         // LOG("The length of this path is " << closed_list[goal_node].f << ".");
     }
-    DEBUG("returning");
+    // DEBUG("returning");
     }
-    DEBUG("af scope");
+    // DEBUG("af scope");
     // mySearchResult.node_path.clear();
     return mySearchResult;
    

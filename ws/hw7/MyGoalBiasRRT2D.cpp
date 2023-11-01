@@ -23,8 +23,6 @@ amp::Path2D amp::MyGoalBiasRRT2D::plan(const amp::Problem2D& problem) {
 
     q_goal = problem.q_goal;
 
-    // LOG("q_init: " << q_near[0] << ", " << q_near[1]);
-
     double x_min = problem.x_min;
     double x_max = problem.x_max;
     double y_min = problem.y_min;
@@ -59,8 +57,6 @@ amp::Path2D amp::MyGoalBiasRRT2D::plan(const amp::Problem2D& problem) {
             q_rand = problem.q_goal;
         }
 
-        // LOG("q_rand: " << q_rand[0] << ", " << q_rand[1]);
-
         closest_node = 0;
         dist = distBetween(map.at(0), q_rand);
 
@@ -70,9 +66,6 @@ amp::Path2D amp::MyGoalBiasRRT2D::plan(const amp::Problem2D& problem) {
                 dist = distBetween(map.at(i), q_rand);
             }
         }
-
-        // LOG("closest point: " << map.at(closest_node)[0] << ", " << map.at(closest_node)[1]);
-        // LOG("closest dist node " << closest_node << ": " << dist);
 
         if (r_ - dist < 0) {
             angle2rand = atan2(q_rand[1] - map.at(closest_node)[1], q_rand[0] - map.at(closest_node)[0]);
@@ -101,23 +94,11 @@ amp::Path2D amp::MyGoalBiasRRT2D::plan(const amp::Problem2D& problem) {
             pathProblem.graph->connect(ind-1, ind, distBetween(q_new, q_goal));
             heuristic.heuristic_values.insert({ind, distBetween(q_new,q_goal)});
         }
-        // LOG("q_new " << ind << ": " << q_new[0] << ", " << q_new[1]);
-        // LOG("q_goal: " << q_goal[0] << ", " << q_goal[1]);
-        // LOG("dist2goal: " << distBetween(q_new, q_goal));
-        // LOG("");
-        // LOG("");
-        // pathProblem.graph->print();
         // if (iter % 10 == 0) {
         //     amp::Visualizer::makeFigure(problem, *pathProblem.graph, [map](amp::Node node) -> Eigen::Vector2d { return map.at(node); });
         //     amp::Visualizer::showFigures();
         // }
     }
-
-
-
-    // LOG("min dist: " << min_dist);
-
-    // pathProblem.graph->print();
 
     if (goal_found) {
         graph_ = *pathProblem.graph;
@@ -134,14 +115,8 @@ amp::Path2D amp::MyGoalBiasRRT2D::plan(const amp::Problem2D& problem) {
             path.waypoints.push_back(map.at(element));
         }
 
-        // pathProblem.graph = nullptr;
-        // map.clear();
-
         return path;
     }
-
-    // pathProblem.graph = nullptr;
-    // map.clear();
 
     return amp::Path2D();
 }

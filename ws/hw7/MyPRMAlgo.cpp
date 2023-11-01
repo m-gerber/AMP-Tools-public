@@ -1,6 +1,6 @@
 #include "MyAStarAlgo.h"
 #include "MyPRMAlgo.h"
-#include "hw/HW6.h"
+
 #include <vector>
 #include <map>
 #include <Eigen/Core>
@@ -100,31 +100,20 @@ amp::Path2D amp::MyPRM2D::plan_2D(const amp::Problem2D& problem) {
         }
     }
 
-    // map_ = map;
-    // graph_ = *pathProblem.graph;
+    map_ = map;
+    graph_ = *pathProblem.graph;
 
     amp::MyAStarAlgo aStar;
-    // amp::ShortestPathProblem pathProblem;
-    // pathProblem.graph = std::make_shared<Graph<double>>(graph);
 	pathProblem.init_node = 0;
 	pathProblem.goal_node = 1;
-    //amp::AStar::GraphSearchResult searchResult = aStar.search(pathProblem, heuristic);
-    DEBUG("b4 astar");
     amp::AStar::GraphSearchResult searchResult = aStar.search(pathProblem, amp::SearchHeuristic());
-    DEBUG("af astar");
-    // map.clear();
-    // pathProblem.graph->clear();
-    //pathProblem.graph = nullptr;
-
-    // amp::ShortestPathProblem pathEx3 = HW6::getEx3SPP();
-    // amp::AStar::GraphSearchResult searchResult = aStar.search(pathEx3, heuristic);
 
     amp::Path2D path;
 
     for (const auto& element : searchResult.node_path) {
         path.waypoints.push_back(sampled_points[element]);
     }
-    DEBUG("returning path");
+    
     return path;
 }
 

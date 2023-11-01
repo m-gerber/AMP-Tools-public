@@ -47,8 +47,8 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
         double r_a = 1;
         amp::MyPRM2D prm_tester_a(n_a,r_a);
 
-        Graph<double> graph;
-        std::map<amp::Node, Eigen::Vector2d> map;
+        Graph<double> graphq1a, graphq1b1, graphq1b2;
+        std::map<amp::Node, Eigen::Vector2d> mapq1a, mapq1b1, mapq1b2;
 
         goal_found = false;
         iter = 0;
@@ -59,10 +59,10 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
             
             if (prm_path_testerq1a.waypoints.size() > 0) {
                 if (smoothing) prm_path_testerq1a = pathSmoothing(prm_path_testerq1a, q1a);
-                graph = prm_tester_a.returnGraph();
-                map = prm_tester_a.returnMap();
+                graphq1a = prm_tester_a.returnGraph();
+                mapq1a = prm_tester_a.returnMap();
                 amp::Visualizer::makeFigure(q1a, prm_path_testerq1a);
-                amp::Visualizer::makeFigure(q1a, graph, map);
+                amp::Visualizer::makeFigure(q1a, graphq1a, mapq1a);
                 goal_found = true;
                 LOG("Exercise 1a took " << iter << " trial(s) with path length: " << prm_path_testerq1a.length() << " for n = " << n_a << " and r = " << r_a << ".");
             }
@@ -79,10 +79,10 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
             amp::Path2D prm_path_testerq1b1 = prm_tester_b.plan(q1b1);
             if (prm_path_testerq1b1.waypoints.size() > 0) {
                 if (smoothing) prm_path_testerq1b1 = pathSmoothing(prm_path_testerq1b1, q1b1);
-                graph = prm_tester_b.returnGraph();
-                map = prm_tester_b.returnMap();
+                graphq1b1 = prm_tester_b.returnGraph();
+                mapq1b1 = prm_tester_b.returnMap();
                 amp::Visualizer::makeFigure(q1b1, prm_path_testerq1b1);
-                amp::Visualizer::makeFigure(q1b1, graph, map);
+                amp::Visualizer::makeFigure(q1b1, graphq1b1, mapq1b1);
                 goal_found = true;
                 LOG("Exercise 1b1 took " << iter << " trial(s) with path length: " << prm_path_testerq1b1.length() << " for n = " << n_b << " and r = " << r_b << ".");
             }
@@ -95,10 +95,10 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
             amp::Path2D prm_path_testerq1b2 = prm_tester_b.plan(q1b2);
             if (prm_path_testerq1b2.waypoints.size() > 0) {
                 if (smoothing) prm_path_testerq1b2 = pathSmoothing(prm_path_testerq1b2, q1b2);
-                graph = prm_tester_b.returnGraph();
-                map = prm_tester_b.returnMap();
+                graphq1b2 = prm_tester_b.returnGraph();
+                mapq1b2 = prm_tester_b.returnMap();
                 amp::Visualizer::makeFigure(q1b2, prm_path_testerq1b2);
-                amp::Visualizer::makeFigure(q1b2, graph, map);
+                amp::Visualizer::makeFigure(q1b2, graphq1b2, mapq1b2);
                 goal_found = true;
                 LOG("Exercise 1b2 took " << iter << " trial(s) with path length: " << prm_path_testerq1b2.length() << " for n = " << n_b << " and r = " << r_b << ".");
             }
@@ -159,20 +159,27 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
             path_lengthq1a.push_back(vec_path_lengthq1a);
             comp_timeq1a.push_back(vec_comp_timeq1a);
 
+            double sum_path_lengthq1a = 0;
+            double sum_comp_timeq1a = 0;
+
+            for (int k = 0; k < num_trials; k++) {
+                sum_path_lengthq1a += vec_path_lengthq1a[i];
+                sum_comp_timeq1a += vec_comp_timeq1a[i];
+            }
+
             LOG("Round " << i << " for Exercise 2.(a) of Homework 5 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
-            // LOG("");
-            // LOG(" ----- SUCCESSES ------");
-            // LOG("num: " << num_successes << " (" << static_cast<double>(num_successes)/static_cast<double>(num_trials)*100.0 << "%)");
-            // LOG("");
-            // LOG(" ---- PATH LENGTH -----");
-            // LOG("total:     " << path_length);
-            // LOG("per trial: " << path_length/static_cast<double>(num_successes));
-            // LOG("");
-            // LOG(" -- COMPUTATION TIME --");
-            // LOG("total:     " << duration.count()/1000.0 << " ms");
-            // LOG("per trial: " << duration.count()/static_cast<double>(num_trials)/1000.0 << " ms");
-            // LOG("");
-            // LOG("");
+            LOG("");
+            LOG(" ----- SUCCESSES ------");
+            LOG("num: " << num_successesq1a << " (" << static_cast<double>(num_successesq1a)/static_cast<double>(num_trials)*100.0 << "%)");
+            LOG("");
+            LOG(" ---- PATH LENGTH -----");
+            LOG("per trial: " << sum_path_lengthq1a/static_cast<double>(num_successesq1a));
+            LOG("");
+            LOG(" -- COMPUTATION TIME --");
+            LOG("total:     " << sum_comp_timeq1a << " ms");
+            LOG("per trial: " << sum_comp_timeq1a/static_cast<double>(num_trials) << " ms");
+            LOG("");
+            LOG("");
 
         }
 
@@ -207,20 +214,27 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
             path_lengthq1b1.push_back(vec_path_lengthq1b1);
             comp_timeq1b1.push_back(vec_comp_timeq1b1);
 
+            double sum_path_lengthq1b1 = 0;
+            double sum_comp_timeq1b1 = 0;
+
+            for (int k = 0; k < num_trials; k++) {
+                sum_path_lengthq1b1 += vec_path_lengthq1a[i];
+                sum_comp_timeq1b1 += vec_comp_timeq1a[i];
+            }
+
             LOG("Round " << i << " for Exercise 2.(b) of Homework 2 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
-            // LOG("");
-            // LOG(" ----- SUCCESSES ------");
-            // LOG("num: " << num_successes << " (" << static_cast<double>(num_successes)/static_cast<double>(num_trials)*100.0 << "%)");
-            // LOG("");
-            // LOG(" ---- PATH LENGTH -----");
-            // LOG("total:     " << path_length);
-            // LOG("per trial: " << path_length/static_cast<double>(num_successes));
-            // LOG("");
-            // LOG(" -- COMPUTATION TIME --");
-            // LOG("total:     " << duration.count()/1000.0 << " ms");
-            // LOG("per trial: " << duration.count()/static_cast<double>(num_trials)/1000.0 << " ms");
-            // LOG("");
-            // LOG("");
+            LOG("");
+            LOG(" ----- SUCCESSES ------");
+            LOG("num: " << num_successesq1b1 << " (" << static_cast<double>(num_successesq1b1)/static_cast<double>(num_trials)*100.0 << "%)");
+            LOG("");
+            LOG(" ---- PATH LENGTH -----");
+            LOG("per trial: " << sum_path_lengthq1b1/static_cast<double>(num_successesq1b1));
+            LOG("");
+            LOG(" -- COMPUTATION TIME --");
+            LOG("total:     " << sum_comp_timeq1b1 << " ms");
+            LOG("per trial: " << sum_comp_timeq1b1/static_cast<double>(num_trials) << " ms");
+            LOG("");
+            LOG("");
 
         }
 
@@ -255,20 +269,27 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, bool sm
             path_lengthq1b2.push_back(vec_path_lengthq1b2);
             comp_timeq1b2.push_back(vec_comp_timeq1b2);
 
+            double sum_path_lengthq1b2 = 0;
+            double sum_comp_timeq1b2 = 0;
+
+            for (int k = 0; k < num_trials; k++) {
+                sum_path_lengthq1b2 += vec_path_lengthq1a[i];
+                sum_comp_timeq1b2 += vec_comp_timeq1a[i];
+            }
+
             LOG("Round " << i << " for Exercise 2.(b) of Homework 2 with n = " << n_test_vals[i] << " and r = " << r_test_vals[i] <<" for " << num_trials << " trials " << (smoothing ? "with " : "without ") << "path smoothing:");
-            // LOG("");
-            // LOG(" ----- SUCCESSES ------");
-            // LOG("num: " << num_successes << " (" << static_cast<double>(num_successes)/static_cast<double>(num_trials)*100.0 << "%)");
-            // LOG("");
-            // LOG(" ---- PATH LENGTH -----");
-            // LOG("total:     " << path_length);
-            // LOG("per trial: " << path_length/static_cast<double>(num_successes));
-            // LOG("");
-            // LOG(" -- COMPUTATION TIME --");
-            // LOG("total:     " << duration.count()/1000.0 << " ms");
-            // LOG("per trial: " << duration.count()/static_cast<double>(num_trials)/1000.0 << " ms");
-            // LOG("");
-            // LOG("");
+            LOG("");
+            LOG(" ----- SUCCESSES ------");
+            LOG("num: " << num_successesq1b2 << " (" << static_cast<double>(num_successesq1b2)/static_cast<double>(num_trials)*100.0 << "%)");
+            LOG("");
+            LOG(" ---- PATH LENGTH -----");
+            LOG("per trial: " << sum_path_lengthq1b2/static_cast<double>(num_successesq1b2));
+            LOG("");
+            LOG(" -- COMPUTATION TIME --");
+            LOG("total:     " << sum_comp_timeq1b2 << " ms");
+            LOG("per trial: " << sum_comp_timeq1b2/static_cast<double>(num_trials) << " ms");
+            LOG("");
+            LOG("");
 
         }
 

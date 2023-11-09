@@ -6,15 +6,17 @@
 
 amp::MultiAgentPath2D amp::MyCentralizedMultiAgentRRT::plan(const amp::MultiAgentProblem2D& problem) {
         
-    prob_ = problem;
+    prob_       = problem;
     num_agents_ = problem.numAgents();
 
-    double x1,y1,x2,y2,dx,dy,dist;
+    // LOG("num agents: " << num_agents_);
+
+    double dist;
     Eigen::VectorXd q_near(2*num_agents_);
     Eigen::VectorXd q_rand(2*num_agents_);
     Eigen::VectorXd  q_new(2*num_agents_);
     Eigen::VectorXd q_goal(2*num_agents_);
-    Eigen::VectorXd unit_step(2*num_agents_);
+    Eigen::VectorXd step_size(2*num_agents_);
 
     amp::LookupSearchHeuristic heuristic;
     std::map<amp::Node, Eigen::VectorXd> map;
@@ -31,7 +33,7 @@ amp::MultiAgentPath2D amp::MyCentralizedMultiAgentRRT::plan(const amp::MultiAgen
     }
 
     map.insert({0, q_near});
-    heuristic.heuristic_values.insert({0,distBetween(q_near,q_goal)});
+    heuristic.heuristic_values.insert({0,(q_near-q_goal).norm()});
 
     double x_min = problem.x_min;
     double x_max = problem.x_max;
@@ -46,10 +48,15 @@ amp::MultiAgentPath2D amp::MyCentralizedMultiAgentRRT::plan(const amp::MultiAgen
 
     int mod_num = round(1.0 / bias_);
 
-    double min_dist = distBetween(q_near,q_goal);
+    double min_dist = (q_near-q_goal).norm();
   
     // while solution not found or below max iterations (n_)...
     while(!goal_found && iter < n_) {
+
+        if (iter % 5000 == 0) {
+            LOG("iter: " << iter);
+            LOG("ind: " << ind);
+        }
 
         iter++;
         ind++;
@@ -63,68 +70,76 @@ amp::MultiAgentPath2D amp::MyCentralizedMultiAgentRRT::plan(const amp::MultiAgen
             q_rand = q_goal;
         }
 
-        closest_node = 0;
-        dist = distBetween(map.at(0), q_rand);
+        closest_node = map.size()-1;
+        dist = (map.at(closest_node) - q_rand).norm();
 
-        for (int i = 1; i < map.size(); i++) { 
-            if (distBetween(map.at(i), q_rand) < dist) {
+        double temp_dist;
+
+        for (int i = closest_node-1; i > -1; i--) { 
+            temp_dist = (map.at(i) - q_rand).norm();
+            if (temp_dist < dist) {
                 closest_node = i;
-                dist = distBetween(map.at(i), q_rand);
+                dist = temp_dist;
             }
         }
 
-        q_new = map.at(closest_node) + (q_rand - map.at(closest_node)) / dist * r_;
-        unit_step = (q_rand - map.at(closest_node)) / dist;
+        // q_new = map.at(closest_node) + (q_rand - map.at(closest_node)) / dist * r_;
+        step_size = (q_rand - map.at(closest_node)) / dist * r_;
 
-        // for (int i = 0; i < num_agents_; i++) {
-        //     double temp_dist = distBetween(Eigen::Vector2d({q_rand(2*i),q_rand(2*i+1)}), Eigen::Vector2d({map.at(closest_node)(2*i),map.at(closest_node)(2*i+1)}));
-        //     // LOG("temp_dist: " << temp_dist);
-        //     q_new(2*i)   = map.at(closest_node)(2*i) + (q_rand(2*i) - map.at(closest_node)(2*i)) / temp_dist * r_;
-        //     q_new(2*i+1) = map.at(closest_node)(2*i+1) + (q_rand(2*i+1) - map.at(closest_node)(2*i+1)) / temp_dist * r_;
-        //     // LOG("d1: " << (q_rand(2*i) - map.at(closest_node)(2*i)) / temp_dist * r_);
-        //     // LOG("d2: " << (q_rand(2*i+1) - map.at(closest_node)(2*i+1)) / temp_dist * r_);
-        // }
+        for (int i = 0; i < num_agents_; i++) {
+            temp_dist = (Eigen::Vector2d({q_rand(2*i)-map.at(closest_node)(2*i),q_rand(2*i+1)-map.at(closest_node)(2*i+1)})).norm();
+            // LOG("temp_dist: " << temp_dist);
+            if (temp_dist < r_) {
+                q_new(2*i) = q_rand(2*i);
+                q_new(2*i+1) = q_rand(2*i+1);
+            } else {
+                q_new(2*i)   = map.at(closest_node)(2*i) + (q_rand(2*i) - map.at(closest_node)(2*i)) / temp_dist * r_;
+                q_new(2*i+1) = map.at(closest_node)(2*i+1) + (q_rand(2*i+1) - map.at(closest_node)(2*i+1)) / temp_dist * r_;
+            }
+            // LOG("d1: " << (q_rand(2*i) - map.at(closest_node)(2*i)) / temp_dist * r_);
+            // LOG("d2: " << (q_rand(2*i+1) - map.at(closest_node)(2*i+1)) / temp_dist * r_);
+        }
 
         // LOG("closest node: " << map.at(closest_node));
         // LOG("q_rand: " << q_rand);
         // LOG("q_new: " << q_new);
         // PAUSE;
 
-        double disc = 1;
+        // double disc = 4;
+        // int step = 0;
 
-        for (int i = 0; i < disc+1; i++) {
-            if (inCollision(map.at(closest_node) + i * unit_step * r_ / disc)) {
-                ind--;
-                continue;
-            }
-        }
-
-        q_new = map.at(closest_node) + (q_rand - map.at(closest_node)) / dist * r_;
-
-        // if (!inCollision(q_new)) {
-            // LOG("not");
-            map.insert({ind, q_new});
-            pathProblem.graph->connect(closest_node, ind, r_);
-            heuristic.heuristic_values.insert({ind, distBetween(q_new,q_goal)});
-        // } else {
-        //     // LOG("colliding");
-        //     ind--;
-        //     continue;
+        // for (int i = disc; i > 0; i--) {
+        //     if (inCollision(map.at(closest_node) + i * step_size * r_ / disc)) {
+        //         ind--;
+        //         continue;
+        //     }
         // }
 
-        if (distBetween(q_new, q_goal) < min_dist) min_dist = distBetween(q_new, q_goal);
+        // q_new = map.at(closest_node) + (q_rand - map.at(closest_node)) / dist * r_;
 
-        if (distBetween(q_new, q_goal) < epsilon_) {
+        // while (inCollision(q_new)) {
+        //     q_new = q_new - step_size / disc;
+        //     step++;
+        // } 
+
+        if (!inCollision(q_new)) {
+            map.insert({ind, q_new});
+            pathProblem.graph->connect(closest_node, ind, r_);
+            heuristic.heuristic_values.insert({ind, (q_new - q_goal).norm()});
+        } else {
+            // LOG("colliding");
+            ind--;
+            continue;
+        }
+
+        temp_dist = (q_new - q_goal).norm();
+        if (temp_dist < epsilon_) {
             goal_found = true;
             ind++;
             map.insert({ind,q_goal});
-            pathProblem.graph->connect(ind-1, ind, distBetween(q_new, q_goal));
-            heuristic.heuristic_values.insert({ind, distBetween(q_new,q_goal)});
+            pathProblem.graph->connect(ind-1, ind, temp_dist);
+            heuristic.heuristic_values.insert({ind, temp_dist});
         }
-        // if (iter % 10 == 0) {
-        //     amp::Visualizer::makeFigure(problem, *pathProblem.graph, [map](amp::Node node) -> Eigen::Vector2d { return map.at(node); });
-        //     amp::Visualizer::showFigures();
-        // }
     }
 
     // LOG("ind: " << ind);
@@ -169,11 +184,11 @@ bool amp::MyCentralizedMultiAgentRRT::inCollision(Eigen::VectorXd state) {
 
         // LOG("agent " << i << " dist2obs: " << dist2obs);
 
-        if (dist2obs < r_i) return true;
+        if (dist2obs < r_i * 1.2) return true;
         for (int j = i+1; j < num_agents_; j++) {
-            dist2agent = distBetween(Eigen::Vector2d({state(2*i),state(2*i+1)}), Eigen::Vector2d({state(2*j),state(2*j+1)}));
+            dist2agent = (Eigen::Vector2d({state(2*i),state(2*i+1)}) - Eigen::Vector2d({state(2*j),state(2*j+1)})).norm();
             r_j = prob_.agent_properties[j].radius;
-            if (dist2agent < r_i + r_j) return true;
+            if (dist2agent < (r_i + r_j) * 1.2) return true;
 
             // LOG("agent " << i << " pos: " << state(2*i) << ", " << state(2*i+1));
             // LOG("agent " << j << " pos: " << state(2*j) << ", " << state(2*j+1));
@@ -185,19 +200,6 @@ bool amp::MyCentralizedMultiAgentRRT::inCollision(Eigen::VectorXd state) {
     // amp::Visualizer::showFigures();
 
     return false;
-}
-
-double amp::MyCentralizedMultiAgentRRT::distBetween(Eigen::VectorXd state1, Eigen::VectorXd state2) {
-    double sum = 0;
-    double diff1, diff2;
-
-    for (int i = 0; i < state1.rows()/2; i++) {
-        diff1 = state2(2*i)   - state1(2*i);
-        diff2 = state2(2*i+1) - state1(2*i+1);
-        sum += diff1*diff1 + diff2*diff2;
-    }
-
-    return sqrt(sum);
 }
 
 bool amp::MyCentralizedMultiAgentRRT::inPolygon(double x_pos, double y_pos) const {

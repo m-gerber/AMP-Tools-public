@@ -29,7 +29,7 @@ class MyDecentralizedMultiAgentRRT : public amp::DecentralizedMultiAgentRRT {
         int num_agents_;
         Graph<double> graph_;
         std::map<amp::Node, Eigen::Vector2d> map_;
-        int n_          = 5000; // Maximum number of iteration
+        int n_          = 7500; // Maximum number of iteration
         double r_       = 0.5;  // Step size
         double bias_    = 0.05; // Probability to sample goal
         double epsilon_ = 0.25; // Radius around goal

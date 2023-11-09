@@ -19,18 +19,18 @@ int main(int argc, char** argv) {
     amp::MultiAgentPath2D path;
 
     amp::MyCentralizedMultiAgentRRT pln;
-    prob = amp::HW8::getWorkspace1(3);
+    prob = amp::HW8::getWorkspace1(6);
     std::vector<std::vector<Eigen::Vector2d>> collision_states;
     do{
         path = pln.plan(prob);
         collision_states.clear();
-    }while(amp::HW8::check(path, prob, collision_states, true));
-    // amp::HW8::check(path, prob, collision_states, false);
+    }while(!amp::HW8::check(path, prob, collision_states, true));
+    amp::HW8::check(path, prob, collision_states, false);
     amp::Visualizer::makeFigure(prob, path, collision_states);
-    amp::Visualizer::makeFigure(prob, path);
+    // amp::Visualizer::makeFigure(prob, path);
     amp::Visualizer::showFigures();
 
-    int num_successes = 0;
+    // int num_successes = 0;
 
     // for (int i = 0; i < 50; i++) {
     //     path = central_checker.plan(ws1);

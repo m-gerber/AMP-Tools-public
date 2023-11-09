@@ -6,12 +6,8 @@ Eigen::Vector2d amp::MyGDAlgo::distance2point(Eigen::Vector2d p1, Eigen::Vector2
     double dy = p2[1] - p1[1];
     double dx = p2[0] - p1[0];
 
-    // std::cout << "dx,dy: " << dx << "," << dy << std::endl;
-
     double dist = sqrt( dx*dx + dy*dy );
     double angle = atan2(dy,dx);
-
-    // std::cout << "angle: " << angle << std::endl;
     
     return Eigen::Vector2d(dist, angle);
 }
@@ -130,10 +126,6 @@ std::vector<Eigen::Vector2d> amp::MyGDAlgo::distance2obs(const amp::Problem2D& p
                 dist2obs = dist2facet;
                 break;
             }
-            // std::cout << "x_v,y_v: " << p1[0] << "," << p1[1] << std::endl;
-            // std::cout << "x_r,y_r: " << point[0] << "," << point[1] << std::endl;
-            // std::cout << "dist, angle: " << distance2point(p1, point)[0] << "," << distance2point(p1, point)[1] << std::endl << std::endl;
-            //PAUSE; 
             if (distance2point(p1, point)[0] < dist2vertex[0]) {
                 dist2vertex = distance2point(p1, point);
             }
@@ -195,14 +187,6 @@ amp::Path2D amp::MyGDAlgo::plan(const amp::Problem2D& problem) {
 
         double mag = sqrt(tot[0]*tot[0] + tot[1]*tot[1]);
         tot = Eigen::Vector2d(tot[0]/mag,tot[1]/mag);
-
-        // std::cout << "x,y: " << myPlan.waypoints.back()[0] << "," << myPlan.waypoints.back()[1] << std::endl;
-        // std::cout << "att_x,att_y: " << att[0] << "," << att[1] << std::endl;
-        // std::cout << "rep_x,rep_y: " << rep[0] << "," << rep[1] << std::endl << std::endl;
-        // PAUSE;
-
-        // x_new = point_curr[0] + att[0] + rep[0];
-        // y_new = point_curr[1] + att[0] + rep[0];
 
         double step_size = 0.01;
         pos_new = point_curr + tot*step_size;

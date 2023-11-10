@@ -6,13 +6,153 @@
 
 amp::MultiAgentPath2D amp::MyDecentralizedMultiAgentRRT::plan(const amp::MultiAgentProblem2D& problem) {
 
+    prob_       = problem;
     num_agents_ = problem.numAgents();
 
-    return amp::MultiAgentPath2D(num_agents_);
+    amp::MultiAgentPath2D path(num_agents_);
+
+    amp::MyAStarAlgo aStar;
+    amp::AStar::GraphSearchResult searchResult;
+
+    double x1,y1,x2,y2,dx,dy,dist;
+    double closest_node, goal_dist;
+    bool goal_found = false;
+    Eigen::Vector2d q_near, q_rand, q_new, q_goal;
+    amp::LookupSearchHeuristic heuristic;
+    std::map<amp::Node, Eigen::Vector2d> map;
+
+    amp::ShortestPathProblem pathProblem;
+    pathProblem.graph = std::make_shared<Graph<double>>();
+
+    double x_min = problem.x_min;
+    double x_max = problem.x_max;
+    double y_min = problem.y_min;
+    double y_max = problem.y_max;
+
+    int iter, ind;
+
+    int mod_num = round(1.0 / bias_);
+
+    for (int i = 0; i < num_agents_; i++) {
+        map.clear();
+        pathProblem.graph->clear();
+
+        // create tree rooted at problem.q_init
+        q_near = problem.agent_properties[i].q_init;
+        q_goal = problem.agent_properties[i].q_goal;
+
+        map.insert({0, q_near});
+        heuristic.heuristic_values.insert({0,(q_near-q_goal).norm()});
+
+        root_dist_.insert({0,0});
+
+        iter = 0;
+        ind = 0; 
+
+        goal_found = false;
+
+        while(!goal_found && iter < n_) {
+
+            iter++;
+            ind++;
+
+            if (iter % mod_num != 0) {
+                x1 = amp::RNG::randd(x_min,x_max);
+                y1 = amp::RNG::randd(y_min,y_max);
+                q_rand = Eigen::Vector2d(x1,y1);
+            } else {
+                q_rand = q_goal;
+            }
+
+            closest_node = 0;
+            dist = (map.at(0) - q_rand).norm();
+
+            for (int i = 1; i < map.size(); i++) { 
+                if ((map.at(i) - q_rand).norm() < dist) {
+                    closest_node = i;
+                    dist = (map.at(i) - q_rand).norm();
+                }
+            }
+
+            if (r_ - dist < 0) {
+                q_new = map.at(closest_node) + (q_rand - map.at(closest_node)) / dist * r_;
+            } else {
+                q_new = q_rand;
+            }
+
+            if (!inCollision(q_new, path, i, closest_node)) {
+                map.insert({ind, q_new});
+                root_dist_.insert({ind,root_dist_.at(closest_node)+1});
+                pathProblem.graph->connect(closest_node, ind, r_);
+                heuristic.heuristic_values.insert({ind, (q_new-q_goal).norm()});
+            } else {
+                ind--;
+                continue;
+            }
+
+            goal_dist = (q_new - q_goal).norm();
+            if (goal_dist < epsilon_) {
+                goal_found = true;
+                ind++;
+                map.insert({ind,q_goal});
+                pathProblem.graph->connect(ind-1, ind, goal_dist);
+                heuristic.heuristic_values.insert({ind, goal_dist});
+            }
+            // if (iter % 10 == 0) {
+            //     amp::Visualizer::makeFigure(problem, *pathProblem.graph, [map](amp::Node node) -> Eigen::Vector2d { return map.at(node); });
+            //     amp::Visualizer::showFigures();
+            // }
+        }
+
+        tree_size_ += ind;
+
+        if (goal_found) {
+            pathProblem.init_node = 0;
+            pathProblem.goal_node = map.size()-1;
+            searchResult = aStar.search(pathProblem, heuristic);
+
+            for (const auto& element : searchResult.node_path) {
+                path.agent_paths[i].waypoints.push_back(map.at(element));
+            }
+        } else {
+            return path;
+        }
+    }
+
+    return path;
 }
 
-double amp::MyDecentralizedMultiAgentRRT::distBetween(Eigen::Vector2d p1, Eigen::Vector2d p2) {
-    return sqrt( (p1[0]-p2[0])*(p1[0]-p2[0]) + (p1[1]-p2[1])*(p1[1]-p2[1]) );
+bool amp::MyDecentralizedMultiAgentRRT::inCollision(Eigen::Vector2d state, amp::MultiAgentPath2D path, int i, double closest_ind) {
+    double dist2obs, dist2agent;
+    double r_i, r_k;
+
+    Eigen::Vector2d temp_point;
+
+    for (int j = 0; j < i+1; j++) {
+
+        dist2obs = distance2obs(prob_, state);
+        r_i = prob_.agent_properties[i].radius;
+
+        // LOG("agent " << i << " dist2obs: " << dist2obs);
+
+        if (dist2obs < r_i * 1.2) return true;
+        if (inPolygon(state[0],state[1])) return true;
+        for (int k = 0; k < i; k++) {
+            temp_point = path.agent_paths[k].waypoints[root_dist_.at(closest_ind)+1];
+            dist2agent = (state-temp_point).norm();
+            r_k = prob_.agent_properties[k].radius;
+            if (dist2agent < (r_i + r_k) * 1.2) return true;
+
+            // LOG("agent " << i << " pos: " << state(2*i) << ", " << state(2*i+1));
+            // LOG("agent " << j << " pos: " << state(2*j) << ", " << state(2*j+1));
+            // LOG("dist between " << i << " and " << j << ": " << dist2agent);
+        }
+    }
+
+    // amp::Visualizer::makeFigure(amp::HW8::getWorkspace1(),path);
+    // amp::Visualizer::showFigures();
+
+    return false;
 }
 
 bool amp::MyDecentralizedMultiAgentRRT::inPolygon(double x_pos, double y_pos) const {
@@ -52,7 +192,7 @@ bool amp::MyDecentralizedMultiAgentRRT::inPolygon(double x_pos, double y_pos) co
     return inside;
 }
 
-bool amp::MyDecentralizedMultiAgentRRT::lineIntersect(Eigen::Vector2d p1, Eigen::Vector2d p2, amp::Problem2D prob) {
+bool amp::MyDecentralizedMultiAgentRRT::lineIntersect(Eigen::Vector2d p1, Eigen::Vector2d p2, amp::MultiAgentProblem2D prob) {
     double x1 = p1[0];
     double y1 = p1[1];
     double x2 = p2[0];
@@ -179,21 +319,24 @@ Eigen::Vector2d amp::MyDecentralizedMultiAgentRRT::nearFacet(Eigen::Vector2d poi
     return dist2facet;
 }
 
-std::vector<Eigen::Vector2d> amp::MyDecentralizedMultiAgentRRT::distance2obs(const amp::Problem2D& problem, Eigen::Vector2d point) {
+double amp::MyDecentralizedMultiAgentRRT::distance2obs(const amp::MultiAgentProblem2D& problem, Eigen::Vector2d point) {
 
-    std::vector<Eigen::Vector2d> d_obs;
+    double d_obs = 1e9;
 
     int num_obstacles = problem.obstacles.size();
     int num_vertices;
 
     Eigen::Vector2d p1, p2;
-    Eigen::Vector2d dist2obs, dist2facet, dist2vertex;
+    double dist2obs, dist2facet, dist2vertex;
+
+    // LOG("point: " << point[0] << ", " << point[1]);
 
     for (int i = 0; i < num_obstacles; i++) {
-        num_vertices =  problem.obstacles[i].verticesCCW().size();
+        num_vertices = problem.obstacles[i].verticesCCW().size();
+
         p1 = Eigen::Vector2d(problem.obstacles[i].verticesCCW().back()[0],problem.obstacles[i].verticesCCW().back()[1]);
-        dist2facet[0] = -1;
-        dist2vertex = distance2point(p1, point);
+        dist2facet = -1;
+        dist2vertex = distance2point(p1, point)[0];
         for (int j = 0; j < num_vertices; j++) {
             if (j > 0) {
                 p1 = Eigen::Vector2d(problem.obstacles[i].verticesCCW()[j-1][0],problem.obstacles[i].verticesCCW()[j-1][1]);
@@ -201,17 +344,22 @@ std::vector<Eigen::Vector2d> amp::MyDecentralizedMultiAgentRRT::distance2obs(con
             } else {
                 p2 = Eigen::Vector2d(problem.obstacles[i].verticesCCW()[0][0],problem.obstacles[i].verticesCCW()[0][1]);
             }
-            dist2facet = nearFacet(point,p1,p2);
-            if (dist2facet[0] != -1) {
+
+            // LOG("p1: " << p1[0] << ", " << p1[1]);
+            // LOG("p2: " << p2[0] << ", " << p2[1]);
+            // PAUSE;
+
+            dist2facet = nearFacet(point,p1,p2)[0];
+            if (dist2facet != -1) {
                 dist2obs = dist2facet;
                 break;
             }
-            if (distance2point(p1, point)[0] < dist2vertex[0]) {
-                dist2vertex = distance2point(p1, point);
+            if (distance2point(p1, point)[0] < dist2vertex) {
+                dist2vertex = distance2point(p1, point)[0];
             }
         }
-        if (dist2facet[0] == -1) dist2obs = dist2vertex;
-        d_obs.push_back(dist2obs);
+        if (dist2facet == -1) dist2obs = dist2vertex;
+        if (dist2obs < d_obs) d_obs = dist2obs;
     }
     return d_obs;
 }

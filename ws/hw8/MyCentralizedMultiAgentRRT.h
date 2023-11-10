@@ -21,14 +21,12 @@ class MyCentralizedMultiAgentRRT : public amp::CentralizedMultiAgentRRT {
         double distance2facet(Eigen::Vector2d point, double slope, Eigen::Vector2d intercept);
         Eigen::Vector2d nearFacet(Eigen::Vector2d point, Eigen::Vector2d p1, Eigen::Vector2d p2);
         double distance2obs(const amp::MultiAgentProblem2D& problem, Eigen::Vector2d point);
-        Graph<double> returnGraph() {return graph_;};
-        std::map<amp::Node, Eigen::VectorXd> returnMap() {return map_;};
+        int returnTreeSize() {return tree_size_;};
 
     private:
         amp::MultiAgentProblem2D prob_;
         int num_agents_;
-        Graph<double> graph_;
-        std::map<amp::Node, Eigen::VectorXd> map_;
+        int tree_size_ = 0;
         int n_          = 7500; // Maximum number of iteration
         double r_       = 0.5;  // Step size
         double bias_    = 0.05; // Probability to sample goal

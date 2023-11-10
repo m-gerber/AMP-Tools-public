@@ -9,9 +9,7 @@ amp::MultiAgentPath2D amp::MyCentralizedMultiAgentRRT::plan(const amp::MultiAgen
     prob_       = problem;
     num_agents_ = problem.numAgents();
 
-    // LOG("num agents: " << num_agents_);
-
-    double dist;
+    double dist, temp_dist;
     Eigen::VectorXd q_near(2*num_agents_);
     Eigen::VectorXd q_rand(2*num_agents_);
     Eigen::VectorXd  q_new(2*num_agents_);
@@ -43,8 +41,7 @@ amp::MultiAgentPath2D amp::MyCentralizedMultiAgentRRT::plan(const amp::MultiAgen
     double closest_node;
     bool goal_found = false;
 
-    int iter = 0;
-    int ind  = 0;
+    int iter = 0, ind  = 0;
 
     int mod_num = round(1.0 / bias_);
 
@@ -53,18 +50,18 @@ amp::MultiAgentPath2D amp::MyCentralizedMultiAgentRRT::plan(const amp::MultiAgen
     // while solution not found or below max iterations (n_)...
     while(!goal_found && iter < n_) {
 
-        if (iter % 5000 == 0) {
-            LOG("iter: " << iter);
-            LOG("ind: " << ind);
-        }
+        // if (iter % 1000 == 0) {
+        //     LOG("iter: " << iter);
+        //     LOG("ind: " << ind);
+        // }
 
         iter++;
         ind++;
 
         if (iter % mod_num != 0) {
             for (int i = 0; i < num_agents_; i++) {
-                q_rand(2*i)   = amp::RNG::randd(x_min,x_max);
-                q_rand(2*i+1) = amp::RNG::randd(y_min,y_max);
+                q_rand(2*i)   = amp::RNG::srandd(x_min,x_max);
+                q_rand(2*i+1) = amp::RNG::srandd(y_min,y_max);
             }
         } else {
             q_rand = q_goal;
@@ -72,8 +69,6 @@ amp::MultiAgentPath2D amp::MyCentralizedMultiAgentRRT::plan(const amp::MultiAgen
 
         closest_node = map.size()-1;
         dist = (map.at(closest_node) - q_rand).norm();
-
-        double temp_dist;
 
         for (int i = closest_node-1; i > -1; i--) { 
             temp_dist = (map.at(i) - q_rand).norm();
@@ -93,7 +88,7 @@ amp::MultiAgentPath2D amp::MyCentralizedMultiAgentRRT::plan(const amp::MultiAgen
                 q_new(2*i) = q_rand(2*i);
                 q_new(2*i+1) = q_rand(2*i+1);
             } else {
-                q_new(2*i)   = map.at(closest_node)(2*i) + (q_rand(2*i) - map.at(closest_node)(2*i)) / temp_dist * r_;
+                q_new(2*i)   = map.at(closest_node)(2*i)   + (q_rand(2*i)   - map.at(closest_node)(2*i))   / temp_dist * r_;
                 q_new(2*i+1) = map.at(closest_node)(2*i+1) + (q_rand(2*i+1) - map.at(closest_node)(2*i+1)) / temp_dist * r_;
             }
             // LOG("d1: " << (q_rand(2*i) - map.at(closest_node)(2*i)) / temp_dist * r_);
@@ -127,7 +122,6 @@ amp::MultiAgentPath2D amp::MyCentralizedMultiAgentRRT::plan(const amp::MultiAgen
             pathProblem.graph->connect(closest_node, ind, r_);
             heuristic.heuristic_values.insert({ind, (q_new - q_goal).norm()});
         } else {
-            // LOG("colliding");
             ind--;
             continue;
         }
@@ -142,12 +136,12 @@ amp::MultiAgentPath2D amp::MyCentralizedMultiAgentRRT::plan(const amp::MultiAgen
         }
     }
 
+    tree_size_ = ind;
+
     // LOG("ind: " << ind);
     // LOG("goal found: " << goal_found);
 
     if (goal_found) {
-        graph_ = *pathProblem.graph;
-        map_ = map;
 
         amp::MyAStarAlgo aStar;
         pathProblem.init_node = 0;
@@ -185,6 +179,7 @@ bool amp::MyCentralizedMultiAgentRRT::inCollision(Eigen::VectorXd state) {
         // LOG("agent " << i << " dist2obs: " << dist2obs);
 
         if (dist2obs < r_i * 1.2) return true;
+        if (inPolygon(state(2*i),state(2*i+1))) return true;
         for (int j = i+1; j < num_agents_; j++) {
             dist2agent = (Eigen::Vector2d({state(2*i),state(2*i+1)}) - Eigen::Vector2d({state(2*j),state(2*j+1)})).norm();
             r_j = prob_.agent_properties[j].radius;
@@ -382,8 +377,8 @@ double amp::MyCentralizedMultiAgentRRT::distance2obs(const amp::MultiAgentProble
         num_vertices = problem.obstacles[i].verticesCCW().size();
 
         p1 = Eigen::Vector2d(problem.obstacles[i].verticesCCW().back()[0],problem.obstacles[i].verticesCCW().back()[1]);
-        dist2facet = -1;
-        dist2vertex = distance2point(p1, point)[0];
+        dist2vertex = (p1 - point).norm();
+        dist2obs    = dist2vertex;
         for (int j = 0; j < num_vertices; j++) {
             if (j > 0) {
                 p1 = Eigen::Vector2d(problem.obstacles[i].verticesCCW()[j-1][0],problem.obstacles[i].verticesCCW()[j-1][1]);
@@ -392,23 +387,17 @@ double amp::MyCentralizedMultiAgentRRT::distance2obs(const amp::MultiAgentProble
                 p2 = Eigen::Vector2d(problem.obstacles[i].verticesCCW()[0][0],problem.obstacles[i].verticesCCW()[0][1]);
             }
 
-            // LOG("p1: " << p1[0] << ", " << p1[1]);
-            // LOG("p2: " << p2[0] << ", " << p2[1]);
-            // PAUSE;
-
             dist2facet = nearFacet(point,p1,p2)[0];
-            if (dist2facet != -1) {
-                dist2obs = dist2facet;
-                break;
-            }
-            if (distance2point(p1, point)[0] < dist2vertex) {
-                dist2vertex = distance2point(p1, point)[0];
+            if (dist2facet != -1) break;
+            if ((p1 - point).norm() < dist2vertex) {
+                dist2vertex = (p1 - point).norm();
             }
         }
-        if (dist2facet == -1) dist2obs = dist2vertex;
-
-        // LOG("d_obs: " << dist2obs);
-
+        if (dist2facet != -1) {
+            dist2obs = dist2facet;
+        } else {
+            dist2obs = dist2vertex;
+        }
         if (dist2obs < d_obs) d_obs = dist2obs;
     }
     return d_obs;

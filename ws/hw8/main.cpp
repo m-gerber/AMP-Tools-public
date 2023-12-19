@@ -71,16 +71,16 @@ int main(int argc, char** argv) {
     int num_trials = 100; // Set the number of trials to run
 
     bool plotE1    = 0;   // Plot exercise 1 questions
-    bool trialsE1  = 1;   // Run XX trials for benchmark
-    bool boxE1     = 1;   // Plot performance statistics
+    bool trialsE1  = 0;   // Run XX trials for benchmark
+    bool boxE1     = 0;   // Plot performance statistics
     helper.runE1(plotE1, trialsE1, boxE1, num_trials);
 
     bool plotE2    = 0;   // Plot exercise 1 questions
-    bool trialsE2  = 1;   // Run XX trials for benchmark
-    bool boxE2     = 1;   // Plot performance statistics
+    bool trialsE2  = 0;   // Run XX trials for benchmark
+    bool boxE2     = 0;   // Plot performance statistics
     helper.runE2(plotE2, trialsE2, boxE2, num_trials);
 
-    // amp::HW8::grade<amp::MyCentralizedMultiAgentRRT, amp::MyDecentralizedMultiAgentRRT>("mage7128@colorado.edu", argc, argv);
+    amp::HW8::grade<amp::MyCentralizedMultiAgentRRT, amp::MyDecentralizedMultiAgentRRT>("mage7128@colorado.edu", argc, argv);
 
     return 0;
 }

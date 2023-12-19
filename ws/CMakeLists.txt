@@ -9,6 +9,10 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/shared")
         Eigen3::Eigen
         AMPCorePrivate
         AMPCorePublic
+        ompl::ompl
+        Boost::filesystem
+        Boost::system
+        Boost::program_options
     )
     target_include_directories(user_library PUBLIC
         ${AMP_INCLUDE_DIRS}
@@ -26,6 +30,10 @@ foreach(SUBDIR ${HW_SUBDIRECTORIES})
             Eigen3::Eigen
             AMPCorePrivate
             AMPCorePublic
+            ompl::ompl
+            Boost::filesystem
+            Boost::system
+            Boost::program_options
         )
         target_include_directories(${TARGET_NAME} PUBLIC
             ${AMP_INCLUDE_DIRS}

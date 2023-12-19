@@ -24,6 +24,7 @@ endif()
 # C++ libs
 find_package (Eigen3 3.3.4 REQUIRED NO_MODULE)
 find_package(OpenSSL REQUIRED)
+find_package(Boost 1.70 COMPONENTS system filesystem program_options REQUIRED)
 if(AMP_BUILD_LIB)
     find_package(Boost 1.70 REQUIRED)
 endif()
@@ -93,6 +94,7 @@ set(AMP_INCLUDE_DIRS
 
 set(AMP_DEPENDENCY_INCLUDE_DIRS 
     ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/yaml-cpp/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/ompl/src
     ${EIGEN3_INCLUDE_DIRS}
     ${PYTHON_INCLUDE_DIRS}
 )
@@ -118,6 +120,7 @@ else()
 
 endif()
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/ompl)
 add_subdirectory(scripts)
 add_subdirectory(include/public)
 add_subdirectory(src/public)

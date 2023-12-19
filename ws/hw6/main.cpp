@@ -1,7 +1,6 @@
 #include "AMPCore.h"
 #include "hw/HW6.h"
 #include "hw/HW2.h"
-#include "HelpfulClass.h"
 #include "MyGridCSpace.h"
 #include "MyGridCSpace2DConstructor.h"
 #include "MyPointWFAlgo.h"

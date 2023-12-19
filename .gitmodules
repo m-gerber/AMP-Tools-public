@@ -1,3 +1,6 @@
 [submodule "dependencies/yaml-cpp"]
 	path = dependencies/yaml-cpp
 	url = git@github.com:jbeder/yaml-cpp.git
+[submodule "dependencies/ompl"]
+	path = dependencies/ompl
+	url = git@github.com:ompl/ompl.git

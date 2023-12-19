@@ -70,8 +70,8 @@ void amp::main_helper::runE1(bool verbose, bool verbose2, bool verbose3, int num
         }
 
         if (verbose3) {
-            title_comp = "Computation Time vs. m Robots (Centralized";
-            title_tree = "Tree Size vs. m Robots (Centralized";
+            title_comp = "Computation Time vs. m Robots (Centralized)";
+            title_tree = "Tree Size vs. m Robots (Centralized)";
             ylabel = "Computation Time (ms)";
             amp::Visualizer::makeBoxPlot(comp_time, labels, title_comp, xlabel, ylabel);
             ylabel = "Number of Elements in Tree";
@@ -151,7 +151,7 @@ void amp::main_helper::runE2(bool verbose, bool verbose2, bool verbose3, int num
         }
 
         if (verbose3) {
-            title_comp = "Computation Time vs. m Robots (Decentralized";
+            title_comp = "Computation Time vs. m Robots (Decentralized)";
             title_tree = "Tree Size vs. m Robots (Decentralized)";
             ylabel = "Computation Time (ms)";
             amp::Visualizer::makeBoxPlot(comp_time, labels, title_comp, xlabel, ylabel);

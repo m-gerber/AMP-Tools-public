@@ -1,0 +1,54 @@
+% Max Gerber
+% ASEN 5254
+% 16 December 2023
+
+close all
+clear
+clc
+
+% Script to plot workspace and solutions from OMPL.
+
+%% Load Data
+
+workspace = fileread("Problem.yml");
+workspace = yaml.load(workspace);
+data = load("data.txt");
+
+
+%% Plot Workspace
+
+xmin = 0;
+xmax = workspace.Map.Dimensions{1};
+ymin = 0;
+ymax = workspace.Map.Dimensions{2};
+
+num_obstacles = length(workspace.Map.Obstacles);
+obs_names = fieldnames(workspace.Map.Obstacles);
+
+obstacles = zeros(num_obstacles, 4);
+
+figure, hold on
+axis([xmin xmax ymin ymax])
+
+for i = 1:num_obstacles
+    obstacles(i,1) = workspace.Map.Obstacles.(obs_names{i}){1};
+    obstacles(i,2) = workspace.Map.Obstacles.(obs_names{i}){2};
+    obstacles(i,3) = workspace.Map.Obstacles.(obs_names{i}){3}-...
+        obstacles(i,1);
+    obstacles(i,4) = workspace.Map.Obstacles.(obs_names{i}){4}-...
+        obstacles(i,2);
+    rectangle('Position',obstacles(i,:),'FaceColor',[0 0 0])
+end
+
+%% Plot Path
+
+plot(data(1,1),data(1,2),'bo','MarkerSize',10,'LineWidth',3)
+plot(data(end,1),data(end,2),'ro','MarkerSize',10,'LineWidth',3)
+plot(data(:,1),data(:,2),'x','MarkerSize',10,'LineWidth',3)
+
+
+
+
+
+
+
